@@ -7,6 +7,7 @@ Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++
 | [lead-tracker](lead-tracker) | Lead tracker for a small service business: follow-up flags, Google Calendar reminder links and a dashboard (Excel + Google Sheets, formulas only) |
 | [pdf-tables-to-excel](pdf-tables-to-excel) | Python: PDF tables to one clean Excel sheet, with the totals checked against the source |
 | [fx-daily-report](fx-daily-report) | Python: daily report from a public API (ECB exchange rates) straight to a formatted Excel workbook with a chart |
+| [merge-excel-files](merge-excel-files) | Python: merges Excel and CSV exports with different layouts into one workbook, with a Summary in formulas and a Log of every row left out |
 | [web-scraper-to-excel](web-scraper-to-excel) | Python: polite scraper (robots.txt, delay, retries) that turns 50 pages of a practice site into CSV and Excel, checked against the site's own total |
 | [file-organizer](file-organizer) | Python, standard library only: sorts a messy folder by type and month, sets duplicates aside and undoes everything from a log |
 | [apps-script-sheet-cleanup](apps-script-sheet-cleanup) | JavaScript (Google Apps Script): one-click cleanup of a pasted Google Sheet, an Issues list and a daily summary e-mail, tested in Node |

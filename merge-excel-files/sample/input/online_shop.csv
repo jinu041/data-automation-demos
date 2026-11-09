@@ -1,0 +1,13 @@
+order_id,date,customer_name,item,qty,amount_usd
+1040,2026-09-02,Blue Door Bistro,Oat milk case,5,93.75
+1041,2026-09-07,Blue Door Bistro,Oat milk case,6,112.50
+1042,2026-09-12,Maple Cafe,Oat milk case,5,93.75
+1043,2026-09-17,Blue Door Bistro,Espresso beans 1kg,5,n/a
+1044,2026-09-22,Harbor Bakery,Paper cups (1000),3,117.00
+1045,2026-09-27,Maple Cafe,Grinder cleaning kit,4,48.00
+1046,2026-10-02,Corner Books,Espresso beans 1kg,5,122.50
+1047,2026-10-07,Sunny Juice Bar,Oat milk case,3,56.25
+1048,2026-10-12,Blue Door Bistro,Oat milk case,5,93.75
+1049,2026-10-17,Maple Cafe,Grinder cleaning kit,1,12.00
+1003,2026-09-13,Harbor Bakery,Espresso beans 1kg,5,122.50
+1007,2026-09-29,Maple Cafe,Espresso beans 1kg,5,122.50
