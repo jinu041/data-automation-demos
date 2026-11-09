@@ -26,9 +26,10 @@ A simple tracker for enquiries, follow-ups and quotes. It's built with formulas 
 1. `build.py` builds the files and writes the expected dashboard numbers to `expected.json`, calculated in Python without the spreadsheet formulas.
 2. Excel opens both files, recalculates everything and saves.
 3. `check.py` confirms that there are no error cells and that every dashboard number matches (12 leads, $23,980 open pipeline, 67% win rate, 3 overdue, 5 due this week on the build date).
-4. File metadata is cleaned before publishing (no author name, no printer settings).
+4. The sample was also opened in Google Sheets. Every dashboard number and both breakdown tables came out the same.
+5. File metadata is cleaned before publishing (no author name, file paths or printer settings).
 
-The flags use `TODAY()`, so the sample's flags change as days pass. That's how the tracker works in real use.
+The flags use `TODAY()`, so the sample's flags change as days pass. That's how the tracker works in real use. In Google Sheets, `TODAY()` follows the spreadsheet's time zone (File > Settings), so set it to your own time zone. Otherwise a follow-up due "today" can show up a day early or late.
 
 ## How it was made
 
