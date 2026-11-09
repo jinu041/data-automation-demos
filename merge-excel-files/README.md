@@ -39,6 +39,17 @@ The result, `sample/merged.xlsx`, has 30 orders and 5 rows in the Log: the total
 - `--selftest` builds the three example files in a temporary folder, merges them and checks the order count, every Log reason and row number, the date order, the total against a sum taken straight from the generated data, and the formulas in the written workbook. It also tests the date, amount and quantity readers on edge cases.
 - `sample/merged.xlsx` was recalculated in Excel, and `--check` compared every Summary value with numbers computed separately in Python from the Orders sheet. All matched.
 
+## Korean files
+
+The script also reads Korean exports: headers such as 주문번호, 거래처, 품목 and 금액, dates like `2026년 9월 8일` and amounts like `122,500원` or `₩850,000`. An amount like `12만원` goes to the Log instead of being guessed. `--lang ko` writes the workbook with Korean sheet names and labels (주문, 요약, 빠진 행):
+
+```
+uv run --with openpyxl python merge_files.py --lang ko --make-samples ko_samples
+uv run --with openpyxl python merge_files.py ko_samples --lang ko -o 합친_주문.xlsx
+```
+
+The self-test runs both languages. The Korean example was also recalculated in Excel, and `--check` matched every Summary value with Python.
+
 ## Adapting it
 
 Add your column names to `ALIASES`, and change `NEEDED` if other columns are required. Duplicates are matched on the order ID and the first file (in name order) wins; if a later export can correct an earlier row, the rule can change to "newest file wins".
