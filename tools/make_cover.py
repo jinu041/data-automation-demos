@@ -36,7 +36,7 @@ ul.wide{{margin:36px 70px 0;columns:2;column-gap:60px}}
 .foot{{position:absolute;left:70px;right:70px;bottom:40px;display:flex;justify-content:space-between;font-size:22px;color:#7A858F}}
 </style><h1>{escape(title)}</h1><div class='sub'>{escape(sub)}</div>
 {body}
-<div class='foot'><span>Real screenshots &middot; {escape(data_note)}</span><span>Built and tested with Claude (AI) &middot; reviewed by me</span></div>"""
+<div class='foot'><span>Real output &middot; {escape(data_note)}</span><span>Built and tested with Claude (AI) &middot; reviewed by me</span></div>"""
     with tempfile.TemporaryDirectory() as tmp:
         page = Path(tmp) / "cover.html"
         page.write_text(html, encoding="utf-8")

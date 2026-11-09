@@ -1,0 +1,18 @@
+Date,Region,Store,Item,Qty,Amount
+2026-10-01,North,Riverside,Notebook,3,"1,260.00"
+2026-10-01,South,"Smith, Jones & Co",Mouse,10,150.00
+2026-10-02,North,Old Town,Monitor,2,398.00
+2026-10-02,East,Station,Keyboard,5,225.00
+2026-10-03,South,Harbor,Notebook,1,420.00
+2026-10-03,West,"The ""Corner"" Shop",Cable,20,99.80
+2026-10-04,North,Riverside,Refund,-1,($42.00)
+2026-10-04,East,Station,Monitor,1,199.00
+2026-10-05,West,Hilltop,Notebook,2,840.00
+2026-10-05,South,Harbor,Keyboard,3,N/A
+2026-10-06,East,"Market
+Hall",Mouse,4,60.00
+2026-10-06,North,Old Town,Cable,8,39.92
+2026-10-07,West,Hilltop,Monitor,3,597.00
+2026-10-07,South,"Smith, Jones & Co",Notebook,2,840.00
+2026-10-08,East,Station,Notebook
+2026-10-08,North,Riverside,Keyboard,2,90.00
