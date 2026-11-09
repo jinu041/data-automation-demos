@@ -36,4 +36,4 @@ python build.py   # checks every limit, spaces and repeats, then renders the cov
 
 ## How it was made
 
-Drafted with Claude, an AI agent on my PC. I'm a native Korean speaker and I read every Korean line.
+Drafted with Claude, an AI agent on my PC. In client work, I read every Korean line as a native speaker before delivery.

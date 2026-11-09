@@ -54,7 +54,7 @@ h1{{font-size:62px;font-weight:800;letter-spacing:-1px;margin:64px 70px 0}} .sub
 <div class='lab'>KEYWORD FIELD</div><div class='chips'>{chips}</div><div class='n'>{counts['ios_keywords']} / 100 · no spaces · nothing repeated from the title or subtitle</div></div>
 <div class='card'><div class='lab'>GOOGLE PLAY · TITLE</div><div class='v'>{ko['gp_title']}</div><div class='n'>{counts['gp_title']} / 30</div>
 <div class='lab'>SHORT DESCRIPTION</div><div class='v s'>{ko['gp_short']}</div><div class='n'>{counts['gp_short']} / 80</div></div></div>
-<div class='foot'><span>Sample with a fictional app</span><span>Drafted with Claude (AI) · Korean read by a native speaker</span></div>"""
+<div class='foot'><span>Sample with a fictional app</span><span>Drafted with Claude (AI)</span></div>"""
     with tempfile.TemporaryDirectory() as tmp:
         page = Path(tmp) / "c.html"
         page.write_text(html, encoding="utf-8")
