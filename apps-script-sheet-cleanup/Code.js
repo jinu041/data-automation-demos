@@ -14,6 +14,7 @@ const CONFIG = {
     'won': 'Won', 'closed won': 'Won', 'lost': 'Lost', 'closed lost': 'Lost' },
   won: 'Won',
   lost: 'Lost',
+  amountFormat: '#,##0.00',
   problems: { email: 'missing or not an e-mail', date: 'not a date', status: 'unknown status', amount: 'not a number' },
   menu: { name: 'Cleanup', clean: 'Clean up now', send: 'Send summary now' },
   summary: { title: 'Lead summary', leads: 'Leads', open: 'Open pipeline', won: 'Won', issues: 'Rows that need a look' },
@@ -28,6 +29,7 @@ const CONFIG_KO = {
     '계약': '계약', '계약 완료': '계약', '취소': '취소', '무산': '취소' },
   won: '계약',
   lost: '취소',
+  amountFormat: '#,##0',
   problems: { email: '이메일이 없거나 형식이 틀림', date: '날짜가 아님', status: '모르는 상태', amount: '숫자가 아님' },
   menu: { name: '정리', clean: '지금 정리', send: '요약 메일 보내기' },
   summary: { title: '문의 요약', leads: '문의', open: '진행 중 금액', won: '계약 금액', issues: '확인할 행' },
@@ -162,7 +164,8 @@ function cleanUpSheet() {
   if (!raw) throw new Error(`No sheet called "${CONFIG.rawSheet}"`);
   const rows = raw.getDataRange().getValues().slice(1);
   const result = cleanRows(rows);
-  writeSheet(ss, CONFIG.cleanSheet, CONFIG.headers, result.clean.map(toRow));
+  const clean = writeSheet(ss, CONFIG.cleanSheet, CONFIG.headers, result.clean.map(toRow));
+  if (result.clean.length) clean.getRange(2, CONFIG.headers.length, result.clean.length, 1).setNumberFormat(CONFIG.amountFormat);
   writeSheet(ss, CONFIG.issuesSheet, CONFIG.issuesHeader, result.issues);
   return result;
 }

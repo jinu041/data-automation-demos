@@ -6,10 +6,11 @@ const assert = require('node:assert/strict');
 const app = require('./Code.js');
 
 class FakeSheet {
-  constructor(name, data = []) { this.name = name; this.data = data; }
+  constructor(name, data = []) { this.name = name; this.data = data; this.formats = []; }
   getDataRange() { return { getValues: () => this.data.map(r => r.slice()) }; }
   getRange(row, col, nRows, nCols) {
     return {
+      setNumberFormat: f => { this.formats.push([row, col, nRows, nCols, f]); },
       setValues: values => {
         assert.equal(values.length, nRows, 'row count must match the range');
         values.forEach((r, i) => {
@@ -20,7 +21,7 @@ class FakeSheet {
       },
     };
   }
-  clearContents() { this.data = []; }
+  clearContents() { this.data = []; this.formats = []; }
 }
 
 class FakeSpreadsheet {
@@ -112,6 +113,7 @@ test('cleanUpSheet writes Clean and Issues, and a second run gives the same resu
       [8, 'Status', 'maybe', 'unknown status'],
       [8, 'Amount', 'abc', 'not a number'],
     ]);
+    assert.deepEqual(ss.getSheetByName('Clean').formats, [[2, 6, 4, 1, '#,##0.00']], 'amounts get a number format');
   }
   assert.deepEqual(ss.getSheetByName('Leads').data, RAW, 'the raw sheet is never changed');
 });
