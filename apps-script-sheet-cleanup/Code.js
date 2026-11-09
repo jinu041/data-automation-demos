@@ -8,10 +8,30 @@ const CONFIG = {
   issuesSheet: 'Issues', // rows that need a human look
   summaryTo: '',         // e-mail for the daily summary; leave blank to skip sending
   headers: ['Date', 'Name', 'Email', 'Phone', 'Status', 'Amount'],
+  issuesHeader: ['Row', 'Field', 'Value', 'Problem'],
+  // every spelling people type (lower case) -> the label you want in Clean; the order of labels is the summary order
+  statuses: { 'new': 'New', 'contacted': 'Contacted', 'quote sent': 'Quote sent', 'quoted': 'Quote sent',
+    'won': 'Won', 'closed won': 'Won', 'lost': 'Lost', 'closed lost': 'Lost' },
+  won: 'Won',
+  lost: 'Lost',
+  problems: { email: 'missing or not an e-mail', date: 'not a date', status: 'unknown status', amount: 'not a number' },
+  menu: { name: 'Cleanup', clean: 'Clean up now', send: 'Send summary now' },
+  summary: { title: 'Lead summary', leads: 'Leads', open: 'Open pipeline', won: 'Won', issues: 'Rows that need a look' },
 };
 
-const STATUSES = { 'new': 'New', 'contacted': 'Contacted', 'quote sent': 'Quote sent', 'quoted': 'Quote sent',
-  'won': 'Won', 'closed won': 'Won', 'lost': 'Lost', 'closed lost': 'Lost' };
+// The same script in Korean: add the line `Object.assign(CONFIG, CONFIG_KO);` right after this block.
+const CONFIG_KO = {
+  rawSheet: '문의', cleanSheet: '정리', issuesSheet: '확인 필요',
+  headers: ['날짜', '이름', '이메일', '전화', '상태', '금액'],
+  issuesHeader: ['행', '항목', '값', '문제'],
+  statuses: { '신규': '신규', '새 문의': '신규', '연락': '연락함', '연락함': '연락함', '견적': '견적 보냄', '견적 보냄': '견적 보냄',
+    '계약': '계약', '계약 완료': '계약', '취소': '취소', '무산': '취소' },
+  won: '계약',
+  lost: '취소',
+  problems: { email: '이메일이 없거나 형식이 틀림', date: '날짜가 아님', status: '모르는 상태', amount: '숫자가 아님' },
+  menu: { name: '정리', clean: '지금 정리', send: '요약 메일 보내기' },
+  summary: { title: '문의 요약', leads: '문의', open: '진행 중 금액', won: '계약 금액', issues: '확인할 행' },
+};
 
 function normalizeName(s) {
   return String(s || '').trim().replace(/\s+/g, ' ').toLowerCase()
@@ -55,16 +75,18 @@ function normalizeDate(v) {
 }
 
 function normalizeStatus(s) {
-  return STATUSES[String(s || '').trim().toLowerCase().replace(/\s+/g, ' ')] || '';
+  return CONFIG.statuses[String(s || '').trim().toLowerCase().replace(/\s+/g, ' ')] || '';
 }
 
+// '$1,200.00', '₩120,000', '1,200원' and '(42.00)' are numbers; text such as '12만원' or 'abc' is null (an issue),
+// so a value is never half-read.
 function parseAmount(v) {
   if (typeof v === 'number') return v;
   const s = String(v || '').trim();
   if (!s) return 0;
   const neg = /^\(.*\)$/.test(s) || s.startsWith('-');
-  const n = parseFloat(s.replace(/[^\d.]/g, ''));
-  return isNaN(n) ? null : (neg ? -n : n);
+  const core = s.replace(/\b(usd|krw|eur|gbp)\b/gi, '').replace(/[\s,$€£₩¥원()+-]/g, '');
+  return /^\d+(\.\d+)?$/.test(core) ? (neg ? -1 : 1) * parseFloat(core) : null;
 }
 
 // rows: values under the header. Returns clean rows (one per e-mail, newest date wins), issues and a duplicate count.
@@ -78,10 +100,11 @@ function cleanRows(rows) {
     const rec = { date: normalizeDate(r[0]), name: normalizeName(r[1]), email: normalizeEmail(r[2]),
       phone: normalizePhone(r[3]), status: normalizeStatus(r[4]), amount: parseAmount(r[5]) };
     const problems = [];
-    if (!rec.email) problems.push(['Email', r[2], 'missing or not an e-mail']);
-    if (!rec.date) problems.push(['Date', r[0], 'not a date']);
-    if (!rec.status) problems.push(['Status', r[4], 'unknown status']);
-    if (rec.amount === null) problems.push(['Amount', r[5], 'not a number']);
+    const [hDate, , hEmail, , hStatus, hAmount] = CONFIG.headers;
+    if (!rec.email) problems.push([hEmail, r[2], CONFIG.problems.email]);
+    if (!rec.date) problems.push([hDate, r[0], CONFIG.problems.date]);
+    if (!rec.status) problems.push([hStatus, r[4], CONFIG.problems.status]);
+    if (rec.amount === null) problems.push([hAmount, r[5], CONFIG.problems.amount]);
     if (problems.length) {
       problems.forEach(([field, value, problem]) => issues.push([line, field, String(value), problem]));
       return;
@@ -102,17 +125,18 @@ function summarize(clean) {
   let won = 0, open = 0;
   clean.forEach(r => {
     byStatus[r.status] = (byStatus[r.status] || 0) + 1;
-    if (r.status === 'Won') won += r.amount;
-    else if (r.status !== 'Lost') open += r.amount;
+    if (r.status === CONFIG.won) won += r.amount;
+    else if (r.status !== CONFIG.lost) open += r.amount;
   });
   return { total: clean.length, byStatus, won: Math.round(won * 100) / 100, open: Math.round(open * 100) / 100 };
 }
 
 function summaryText(s, issues, dateStr) {
-  const order = ['New', 'Contacted', 'Quote sent', 'Won', 'Lost'];
+  const t = CONFIG.summary;
+  const order = [...new Set(Object.values(CONFIG.statuses))];
   const lines = order.filter(k => s.byStatus[k]).map(k => `  ${k}: ${s.byStatus[k]}`);
-  return [`Lead summary for ${dateStr}`, '', `Leads: ${s.total}`, ...lines, '',
-    `Open pipeline: ${s.open.toFixed(2)}`, `Won: ${s.won.toFixed(2)}`, `Rows that need a look: ${issues}`].join('\n');
+  return [`${t.title} ${dateStr}`, '', `${t.leads}: ${s.total}`, ...lines, '',
+    `${t.open}: ${s.open.toFixed(2)}`, `${t.won}: ${s.won.toFixed(2)}`, `${t.issues}: ${issues}`].join('\n');
 }
 
 const toRow = r => [r.date, r.name, r.email, r.phone, r.status, r.amount];
@@ -120,8 +144,8 @@ const toRow = r => [r.date, r.name, r.email, r.phone, r.status, r.amount];
 // ---- Apps Script entry points (use SpreadsheetApp, MailApp, ScriptApp) ----
 
 function onOpen() {
-  SpreadsheetApp.getUi().createMenu('Cleanup').addItem('Clean up now', 'cleanUpSheet')
-    .addItem('Send summary now', 'sendDailySummary').addToUi();
+  const m = CONFIG.menu;
+  SpreadsheetApp.getUi().createMenu(m.name).addItem(m.clean, 'cleanUpSheet').addItem(m.send, 'sendDailySummary').addToUi();
 }
 
 function writeSheet(ss, name, header, rows) {
@@ -139,7 +163,7 @@ function cleanUpSheet() {
   const rows = raw.getDataRange().getValues().slice(1);
   const result = cleanRows(rows);
   writeSheet(ss, CONFIG.cleanSheet, CONFIG.headers, result.clean.map(toRow));
-  writeSheet(ss, CONFIG.issuesSheet, ['Row', 'Field', 'Value', 'Problem'], result.issues);
+  writeSheet(ss, CONFIG.issuesSheet, CONFIG.issuesHeader, result.issues);
   return result;
 }
 
@@ -147,7 +171,7 @@ function sendDailySummary() {
   const result = cleanUpSheet();
   const today = normalizeDate(new Date());
   const body = summaryText(summarize(result.clean), result.issues.length, today);
-  if (CONFIG.summaryTo) MailApp.sendEmail(CONFIG.summaryTo, `Lead summary ${today}`, body);
+  if (CONFIG.summaryTo) MailApp.sendEmail(CONFIG.summaryTo, `${CONFIG.summary.title} ${today}`, body);
   return body;
 }
 
@@ -159,6 +183,6 @@ function installDailyTrigger() {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { CONFIG, normalizeName, normalizeEmail, normalizePhone, normalizeDate, normalizeStatus,
+  module.exports = { CONFIG, CONFIG_KO, normalizeName, normalizeEmail, normalizePhone, normalizeDate, normalizeStatus,
     parseAmount, cleanRows, summarize, summaryText, cleanUpSheet, sendDailySummary, installDailyTrigger };
 }
