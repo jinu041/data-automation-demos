@@ -9,6 +9,7 @@ Small, tested demos: spreadsheets that do the math, plus Python, C++ and Java to
 | [fx-daily-report](fx-daily-report) | Python: daily report from a public API (ECB exchange rates) straight to a formatted Excel workbook with a chart |
 | [cpp-csv-summary](cpp-csv-summary) | C++17: command-line tool that groups and totals CSV data, handles quoted fields and reports bad rows by line number |
 | [java-inventory-api](java-inventory-api) | Java: small inventory REST API with the JDK only, input validation, exact money math and HTTP tests |
+| [korean-aso-sample](korean-aso-sample) | Korean App Store and Google Play listing for a fictional app, with every field checked against the store limits and an English back-translation |
 
 More demos (spreadsheets and Python) are in [portfolio-demos](https://github.com/jinu041/portfolio-demos).
 
