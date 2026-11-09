@@ -1,6 +1,6 @@
 # Data and automation demos
 
-Small, tested demos: spreadsheets that do the math, plus Python, C++ and Java tools that clean, convert, collect and serve data. Sample data is made up, except the public ECB exchange rates and the book titles from a public scraping practice site.
+Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++ and Java tools that clean, convert, collect and serve data. Sample data is made up, except the public ECB exchange rates and the book titles from a public scraping practice site.
 
 | Demo | What it shows |
 |---|---|
@@ -9,6 +9,7 @@ Small, tested demos: spreadsheets that do the math, plus Python, C++ and Java to
 | [fx-daily-report](fx-daily-report) | Python: daily report from a public API (ECB exchange rates) straight to a formatted Excel workbook with a chart |
 | [web-scraper-to-excel](web-scraper-to-excel) | Python: polite scraper (robots.txt, delay, retries) that turns 50 pages of a practice site into CSV and Excel, checked against the site's own total |
 | [file-organizer](file-organizer) | Python, standard library only: sorts a messy folder by type and month, sets duplicates aside and undoes everything from a log |
+| [apps-script-sheet-cleanup](apps-script-sheet-cleanup) | JavaScript (Google Apps Script): one-click cleanup of a pasted Google Sheet, an Issues list and a daily summary e-mail, tested in Node |
 | [cpp-csv-summary](cpp-csv-summary) | C++17: command-line tool that groups and totals CSV data, handles quoted fields and reports bad rows by line number |
 | [java-inventory-api](java-inventory-api) | Java: small inventory REST API with the JDK only, input validation, exact money math and HTTP tests |
 | [korean-aso-sample](korean-aso-sample) | Korean App Store and Google Play listing for a fictional app, with every field checked against the store limits and an English back-translation |
