@@ -14,6 +14,7 @@ Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++
 | [cpp-csv-summary](cpp-csv-summary) | C++17: command-line tool that groups and totals CSV data, handles quoted fields and reports bad rows by line number |
 | [java-inventory-api](java-inventory-api) | Java: small inventory REST API with the JDK only, input validation, exact money math and HTTP tests |
 | [korean-aso-sample](korean-aso-sample) | Korean App Store and Google Play listing for a fictional app, with every field checked against the store limits and an English back-translation |
+| [korean-l10n-qa](korean-l10n-qa) | Python, standard library only: checks an English → Korean string table for placeholders, Korean particle traps, glossary terms, consistency, numbers and UI length limits |
 
 More demos (spreadsheets and Python) are in [portfolio-demos](https://github.com/jinu041/portfolio-demos).
 
