@@ -60,9 +60,28 @@ def build(inputs):
     for src, r in raw[1:]:
         if r == header or not any(r):
             continue
-        first = next(c for c in r if c).lower()
-        (totals if first.startswith(TOTAL) else data).append((src, r))
+        (totals if is_total(next(c for c in r if c)) else data).append((src, r))
     return header, data, totals
+
+
+def is_total(label):
+    """'Total', 'Total:', 'Grand total (USD)' or '합계' count as totals; 'Summer mug' does not."""
+    w = re.sub(r"[\s:：]+$", "", label.lower()).strip()
+    return w in TOTAL or any(w.startswith(t + " ") for t in TOTAL if t.isascii())
+
+
+def source_totals(totals):
+    """Last Total row of each input file, added up per column, so merged reports are checked against all files."""
+    last = {}
+    for src, r in totals:
+        last[re.sub(r" p\d+$", "", src)] = r  # 'report.pdf p2' and 'report.pdf p1' are the same file
+    sums = {}
+    for r in last.values():
+        for j, s in enumerate(r):
+            v, _ = parse(s)
+            if isinstance(v, float):
+                sums[j] = round(sums.get(j, 0.0) + v, 2)
+    return sums
 
 
 def write(header, data, totals, out):
@@ -86,6 +105,8 @@ def write(header, data, totals, out):
         for j, s in enumerate((r + [""] * n)[:n], 1):
             v, pct = parse(s)
             c = ws.cell(i, j, None if v in ("", UNREAD) else v)
+            if isinstance(v, str) and v.startswith("="):
+                c.data_type = "s"  # source text, not a formula to run
             if v == UNREAD:
                 c.fill = yellow
                 notes.append(f"{L(j)}{i} ({src}): unreadable in the source, left blank.")
@@ -108,7 +129,7 @@ def write(header, data, totals, out):
         ws.column_dimensions[L(j)].width = min(50, width + 3)
 
     # Check numeric columns only: SUM of the rows (formula) vs the source Total row
-    src_total = dict(enumerate(norm(totals[-1][1]))) if totals else {}
+    src_total = source_totals(totals)
     ck = wb.create_sheet("Check")
     ck.append(["Column", "Sum of rows", "Source total", "Difference", "Result"])
     for c in ck[1]:
@@ -119,8 +140,7 @@ def write(header, data, totals, out):
         if not nums or not all(isinstance(v, float) for v in nums):
             continue
         k = ck.max_row + 1
-        st, _ = parse(src_total.get(j, ""))
-        st = st if isinstance(st, float) else None
+        st = src_total.get(j)
         ck.append([header[j], f"=SUM(Data!{L(j + 1)}2:{L(j + 1)}{last})", st,
                    f'=IF(C{k}="","",B{k}-C{k})', f'=IF(C{k}="","no source total",IF(ABS(D{k})<0.005,"OK","CHECK"))'])
         results.append((header[j], round(sum(nums), 2), st))
@@ -172,6 +192,16 @@ def selftest():
     results, notes = write(header, data, totals, tmp / "scan.xlsx")
     assert results == [("Amount", 749.5, 749.5)], results
     assert len(notes) == 1 and notes[0].startswith("B3"), notes
+    # Two reports merged: checked against 5 + 7, a product named 'Summer mug' stays data, '=1+1' stays text
+    (tmp / "a.csv").write_text("Name,Amount\nSummer mug,2\n=1+1,3\nTotal,5\n", encoding="utf-8")
+    (tmp / "b.csv").write_text("Name,Amount\nTea,7\nTotal:,7\n", encoding="utf-8")
+    header, data, totals = build([tmp / "a.csv", tmp / "b.csv"])
+    assert [r[0] for _, r in data] == ["Summer mug", "=1+1", "Tea"] and len(totals) == 2, (data, totals)
+    results, _ = write(header, data, totals, tmp / "two.xlsx")
+    assert results == [("Amount", 12.0, 12.0)], results
+    from openpyxl import load_workbook as _lw
+    assert _lw(tmp / "two.xlsx")["Data"]["A3"].data_type == "s"
+    assert is_total("Grand total (USD)") and is_total("합계") and not is_total("Summer mug") and not is_total("Sumo")
     assert parse("007") == ("007", False) and parse("2026-11-09") == ("2026-11-09", False)
     assert parse("12%") == (0.12, True) and parse("$1,234.5") == (1234.5, False)
 
