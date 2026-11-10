@@ -1,0 +1,19 @@
+key,en,ko,max_len
+home.title,Home,홈,10
+home.title2,Home,메인,10
+home.welcome,"Welcome, {name}!","{name}님, 환영합니다!",20
+pkg.arrived,You have a package at the front desk.,프런트 데스크에 택배가 도착했어요.,40
+pkg.count,You have {count} packages waiting.,대기 중인 택배가 {count}개 있어요.,30
+resv.title,Amenity reservations,편의시설 예약,20
+resv.confirm,Your reservation for {amenity} is confirmed.,{amenity}이 예약되었어요.,40
+resv.cancel,Cancel reservation,예약 취소,12
+resident.notice,Notice for residents,거주자 공지,20
+maint.request,Submit a maintenance request,수리 요청 보내기,16
+maint.eta,A technician will visit within 2 days.,기사님이 3일 안에 방문해요.,30
+pay.due,Rent is due on the 1st.,월세 납부일은 1일이에요.,25
+pay.amount,You paid {amount}.,{amount}을 결제했어요.,20
+door.code,"Hi {name}, your door code is ready.",현관 비밀번호가 준비됐어요.,30
+settings.lang,Language,Language,10
+help.long,Contact the front desk for help,도움이 필요하시면 언제든지 프런트 데스크로 연락해 주세요,20
+parking.guest,Guest parking,방문 차량  주차,12
+visitor.log,Visitor log,,10
