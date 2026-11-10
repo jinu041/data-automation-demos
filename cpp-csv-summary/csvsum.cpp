@@ -26,24 +26,30 @@ std::string trim(const std::string& s) {
     return s.substr(b, s.find_last_not_of(" \t\r\n") - b + 1);
 }
 
-// Splits one CSV record: quoted fields, commas inside quotes and doubled quotes ("").
-// Returns false while a quote is still open, so the caller can append the next line.
-bool split_csv(const std::string& rec, std::vector<std::string>& out) {
+enum class CsvStatus { complete, incomplete, malformed };
+
+// Splits one CSV record; incomplete quotes let the caller append the next line.
+CsvStatus split_csv(const std::string& rec, std::vector<std::string>& out) {
     out.clear();
     std::string cur;
-    bool quoted = false;
+    bool quoted = false, closed = false;
     for (size_t i = 0; i < rec.size(); ++i) {
         const char c = rec[i];
         if (quoted) {
             if (c != '"') cur += c;
             else if (i + 1 < rec.size() && rec[i + 1] == '"') { cur += '"'; ++i; }
-            else quoted = false;
-        } else if (c == '"') quoted = true;
-        else if (c == ',') { out.push_back(cur); cur.clear(); }
-        else if (c != '\r') cur += c;
+            else { quoted = false; closed = true; }
+        } else if (c == ',') { out.push_back(cur); cur.clear(); closed = false; }
+        else if (c == '"') {
+            if (!cur.empty() || closed) return CsvStatus::malformed;
+            quoted = true;
+        } else if (c != '\r') {
+            if (closed) return CsvStatus::malformed;
+            cur += c;
+        }
     }
     out.push_back(cur);
-    return !quoted;
+    return quoted ? CsvStatus::incomplete : CsvStatus::complete;
 }
 
 // "1,234.50", "$12", "(3.00)" -> number. Anything else that isn't fully numeric is rejected.
@@ -112,8 +118,15 @@ int main(int argc, char** argv) {
             if (line_no == 1 && line.rfind("\xEF\xBB\xBF", 0) == 0) line.erase(0, 3);  // UTF-8 BOM
         }
         rec += rec.empty() ? line : "\n" + line;
-        if (!split_csv(rec, fields)) continue;  // quoted field spans lines
+        const auto status = split_csv(rec, fields);
+        if (status == CsvStatus::incomplete) continue;  // quoted field spans lines
         rec.clear();
+        if (status == CsvStatus::malformed) {
+            std::cerr << "line " << rec_start << ": malformed CSV quoting\n";
+            if (header.empty()) return 1;
+            ++bad;
+            continue;
+        }
         if (header.empty()) {
             header = fields;
             if ((gi = column(header, group_by)) < 0 || (si = column(header, sum_of)) < 0) return 1;
@@ -170,7 +183,21 @@ int main(int argc, char** argv) {
               << static_cast<double>(all.sum) << "\n";
     if (bad) std::cerr << bad << " row(s) skipped, see messages above\n";
     if (!out_path.empty()) {
-        std::ofstream(out_path, std::ios::binary) << csv.str();
+        std::ofstream out(out_path, std::ios::binary);
+        if (!out) {
+            std::cerr << "error: cannot open " << out_path << "\n";
+            return 1;
+        }
+        out << csv.str();
+        if (!out) {
+            std::cerr << "error: cannot write " << out_path << "\n";
+            return 1;
+        }
+        out.close();
+        if (!out) {
+            std::cerr << "error: cannot close " << out_path << "\n";
+            return 1;
+        }
         std::cout << "summary written to " << out_path << "\n";
     }
     return 0;

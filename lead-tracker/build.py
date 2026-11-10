@@ -4,6 +4,7 @@
 import datetime as dt
 import json
 from pathlib import Path
+from urllib.parse import quote
 
 from openpyxl import Workbook
 from openpyxl.formatting.rule import FormulaRule
@@ -71,7 +72,9 @@ def build(path, leads):
         ws[f"L{r}"] = (f'=IF(OR(C{r}="",K{r}="",I{r}="Won",I{r}="Lost"),"",'
                        f'IF(K{r}<TODAY(),"Overdue",IF(K{r}<=TODAY()+7,"This week","")))')
         # Google Calendar all-day event link. SUBSTITUTE instead of ENCODEURL so it also works in Excel for Mac/web.
-        text = f'SUBSTITUTE(SUBSTITUTE(SUBSTITUTE("Follow up: "&C{r}&IF(D{r}=""," "," - "&D{r})," ","%20"),"&","%26"),"#","%23")'
+        text = f'"Follow up: "&C{r}&IF(D{r}=""," "," - "&D{r})'
+        for char in "% +&#":  # Escape percent first so generated escapes stay intact.
+            text = f'SUBSTITUTE({text},"{char}","{quote(char, safe="")}")'
         ws[f"M{r}"] = (f'=IF(OR(C{r}="",K{r}=""),"",HYPERLINK("https://calendar.google.com/calendar/render?action=TEMPLATE&text="'
                        f'&{text}&"&dates="&TEXT(K{r},"yyyymmdd")&"/"&TEXT(K{r}+1,"yyyymmdd"),"Add to Google Calendar"))')
         for col in "BJK":
@@ -135,8 +138,8 @@ def build(path, leads):
         dash[f"F{i}"] = f'=SUMIFS({L("H")},{L("I")},D{i})'
         dash[f"F{i}"].number_format = '"$"#,##0'
     dash["D11"], dash["E11"], dash["F11"] = "By source", "Leads", "Won"
-    for i, s in enumerate(SOURCES, 12):
-        dash[f"D{i}"], dash[f"E{i}"] = s, f'=COUNTIF({L("F")},D{i})'
+    for i in range(12, 12 + len(SOURCES)):
+        dash[f"D{i}"], dash[f"E{i}"] = f"=Lists!A{i - 10}", f'=COUNTIF({L("F")},D{i})'
         dash[f"F{i}"] = f'=COUNTIFS({L("F")},D{i},{L("I")},"Won")'
     for ref in ("D3", "E3", "F3", "D11", "E11", "F11"):
         dash[ref].font, dash[ref].fill = Font(bold=True, color="FFFFFF"), fill(DARK)

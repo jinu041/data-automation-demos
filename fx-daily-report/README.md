@@ -8,7 +8,7 @@ A Python script that pulls the last 30 days of exchange rates from a free public
 
 - **Summary** sheet: latest, average, low, high and change for each currency, as live Excel formulas, plus a line chart
 - **Rates** sheet: one row per business day, numbers formatted per currency
-- **Index** sheet: every currency set to 100 on the first day, so different scales fit in one chart
+- **Index** sheet: every currency set to 100 on its first day with a rate, so different scales fit in one chart
 - Retries on network errors, and a clear message when the API returns nothing
 
 ## Run it

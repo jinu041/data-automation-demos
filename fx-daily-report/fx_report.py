@@ -46,6 +46,8 @@ def write(data, out):
 
     cur, rows = table(data)
     n = len(rows) + 1  # last data row
+    first = [next(i for i, (_, vals) in enumerate(rows, 2) if vals[j] is not None) for j in range(len(cur))]
+    baseline = [rows[i - 2][1][j] for j, i in enumerate(first)]
     head = PatternFill("solid", start_color="2F4858", end_color="2F4858")
     wb = Workbook()
     summ = wb.active
@@ -60,7 +62,7 @@ def write(data, out):
         ws.freeze_panes = "B2"
     for i, (d, vals) in enumerate(rows, 2):
         rates.append([d] + vals)
-        index.append([d] + [f'=IF(Rates!{L(j)}{i}="","",Rates!{L(j)}{i}/Rates!{L(j)}$2*100)' for j in range(2, len(cur) + 2)])
+        index.append([d] + [f'=IF(Rates!{L(j)}{i}="","",Rates!{L(j)}{i}/Rates!{L(j)}${first[j - 2]}*100)' for j in range(2, len(cur) + 2)])
         for ws in (rates, index):
             ws[f"A{i}"].number_format = "yyyy-mm-dd"
         for j, c in enumerate(cur, 2):
@@ -78,7 +80,7 @@ def write(data, out):
     for k, c in enumerate(cur, 5):
         col = f"Rates!${L(k - 3)}$2:${L(k - 3)}${n}"
         summ.append([c, f"=LOOKUP(2,1/({col}<>\"\"),{col})", f"=AVERAGE({col})", f"=MIN({col})", f"=MAX({col})",
-                     f"=B{k}/INDEX({col},1)-1"])
+                     f"=B{k}/Rates!${L(k - 3)}${first[k - 5]}-1"])
         for ref in "BCDE":
             summ[f"{ref}{k}"].number_format = "#,##0." + "0" * DEC.get(c, 4)
         summ[f"F{k}"].number_format = "+0.0%;-0.0%;0.0%"
@@ -86,13 +88,13 @@ def write(data, out):
         summ.column_dimensions[col].width = w
 
     chart = LineChart()
-    chart.title, chart.height, chart.width = "Index (first day = 100)", 8, 18
+    chart.title, chart.height, chart.width = "Index (first available rate = 100)", 8, 18
     chart.add_data(Reference(index, min_col=2, max_col=len(cur) + 1, min_row=1, max_row=n), titles_from_data=True)
     chart.set_categories(Reference(index, min_col=1, min_row=2, max_row=n))
     for s in chart.series:
         s.smooth = False  # straight lines between days, no invented curves
     # Show both axes (Excel hides them unless delete is explicitly False) and fit the scale to the data
-    idx = [v / rows[0][1][j] * 100 for j in range(len(cur)) for _, r in rows for v in [r[j]] if v is not None and rows[0][1][j]]
+    idx = [v / baseline[j] * 100 for j in range(len(cur)) for _, r in rows for v in [r[j]] if v is not None and baseline[j]]
     chart.x_axis.delete = chart.y_axis.delete = False
     chart.x_axis.number_format, chart.y_axis.number_format = "mm-dd", "0"
     chart.y_axis.scaling.min, chart.y_axis.scaling.max = int(min(idx)) - 1, int(max(idx)) + 2
@@ -130,6 +132,20 @@ def selftest():
     assert wb["Summary"]._charts, "chart missing"
     exp = expected(cur, rows)
     assert all(e["low"] <= e["average"] <= e["high"] for e in exp.values())
+    missing = {"base": "USD", "rates": {
+        "2026-11-02": {"EUR": 1}, "2026-11-03": {"EUR": 1.1, "GBP": 2},
+        "2026-11-04": {"EUR": 1.2, "GBP": 3, "JPY": 100}, "2026-11-05": {"JPY": 50}}}
+    cur_missing, rows_missing = write(missing, out.parent / "missing.xlsx")
+    wb_missing = load_workbook(out.parent / "missing.xlsx")
+    for j, (col, start) in enumerate((("B", 2), ("C", 3), ("D", 4)), 5):
+        for i in range(2, 6):
+            assert wb_missing["Index"][f"{col}{i}"].value == f'=IF(Rates!{col}{i}="","",Rates!{col}{i}/Rates!{col}${start}*100)'
+        assert wb_missing["Summary"][f"F{j}"].value == f"=B{j}/Rates!${col}${start}-1"
+        assert wb_missing["Rates"][f"{col}{start}"].value is not None
+    changes = expected(cur_missing, rows_missing)
+    assert changes["GBP"]["change"] == 0.5 and changes["JPY"]["change"] == -0.5
+    scale = wb_missing["Summary"]._charts[0].y_axis.scaling
+    assert scale.min == 49 and scale.max == 152, (scale.min, scale.max)
     print("selftest ok:", out, {c: round(e["change"] * 100, 2) for c, e in exp.items()})
 
 

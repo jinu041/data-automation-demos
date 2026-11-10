@@ -23,6 +23,8 @@ g++ -std=c++17 -O2 -Wall -Wextra -o csvsum csvsum.cpp
 ./csvsum sample/sales.csv --group Store --sum Amount --out by-store.csv
 ```
 
+On Windows with MinGW, add `-static`. Another program's `libstdc++-6.dll` earlier on PATH (Git for Windows ships one) can otherwise be loaded in place of your compiler's and break the error checks.
+
 ## Tests
 
 `python test_csvsum.py` compiles the tool with warnings treated as errors, runs it on `sample/sales.csv`, and compares every group's row count, total, min and max with totals computed separately using Python's `csv` module. It also checks the bad-row messages, grouping by a column whose values contain commas, quotes and a line break, and the error cases.

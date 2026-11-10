@@ -21,6 +21,7 @@ FILES = {  # path: (content, modified date)
     "song.mp3": (b"MP3", "2026-06-01"),
     "unknown.xyz": (b"???", "2026-06-02"),
     ".hidden": (b"H", "2026-06-03"),                  # skipped
+    ".git/config": (b"GIT", "2026-06-04"),            # inside a hidden folder: skipped even with --recursive
 }
 EXPECTED = {
     "photo.jpg": "Images/2026-03/photo.jpg",
@@ -68,7 +69,7 @@ with tempfile.TemporaryDirectory() as tmp:
     for rel, target in EXPECTED.items():
         assert after.get(target) == FILES[rel][0], (rel, target, sorted(after))
     assert after["Documents/2026-03/notes.txt"] == b"OLD", "an existing file must never be overwritten"
-    assert set(snapshot(src)) == {".hidden"}, snapshot(src)
+    assert set(snapshot(src)) == {".hidden", ".git/config"}, snapshot(src)
     logs = list(dest.glob("_organize_log_*.csv"))
     assert len(logs) == 1
     with open(logs[0], newline="", encoding="utf-8-sig") as f:
@@ -80,5 +81,11 @@ with tempfile.TemporaryDirectory() as tmp:
     assert snapshot(src) == before_src, "every file must be back with its original content"
     left = {p.relative_to(dest).as_posix() for p in dest.rglob("*")}
     assert left == {"Documents", "Documents/2026-03", "Documents/2026-03/notes.txt", logs[0].name}, left
+
+    # Two runs in the same second must not share (and overwrite) one undo log
+    first = organize.apply([], dest)
+    first.write_text("from,to,duplicate\nkeep,me,\n", encoding="utf-8-sig")
+    second = organize.apply([], dest)
+    assert second != first and "keep,me" in first.read_text(encoding="utf-8-sig"), (first, second)
 
 print("all checks passed: dry run, apply (types, months, duplicates, name clashes, Korean names), undo")

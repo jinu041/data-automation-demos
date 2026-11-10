@@ -6,6 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -15,6 +19,34 @@ public final class ApiTest {
     static final HttpClient http = HttpClient.newHttpClient();
     static String base;
     static int passed;
+
+    // Pause after an HTTP handler captures its snapshot to force PATCH races.
+    static final class PausingItems extends ConcurrentHashMap<Long, InventoryApi.Item> {
+        private static final long serialVersionUID = 1L;
+        final AtomicBoolean pause = new AtomicBoolean();
+        transient CountDownLatch read;
+        transient CountDownLatch resume;
+
+        void pauseNextGet() {
+            read = new CountDownLatch(1);
+            resume = new CountDownLatch(1);
+            pause.set(true);
+        }
+
+        @Override public InventoryApi.Item get(Object key) {
+            InventoryApi.Item item = super.get(key);
+            if (pause.compareAndSet(true, false)) {
+                read.countDown();
+                try {
+                    if (!resume.await(5, TimeUnit.SECONDS)) throw new AssertionError("PATCH race timed out");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError(e);
+                }
+            }
+            return item;
+        }
+    }
 
     static HttpResponse<String> call(String method, String path, String body) throws Exception {
         HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(base + path)).header("Content-Type", "application/json");
@@ -30,6 +62,10 @@ public final class ApiTest {
 
     public static void main(String[] args) throws Exception {
         InventoryApi api = new InventoryApi(0);
+        PausingItems items = new PausingItems();
+        var field = InventoryApi.class.getDeclaredField("items");
+        field.setAccessible(true);
+        field.set(api, items);
         base = "http://127.0.0.1:" + api.start();
         try {
             var r = call("POST", "/api/items", "{\"name\":\"Mug\",\"qty\":3,\"price\":7.50}");
@@ -80,7 +116,38 @@ public final class ApiTest {
             check(ids.size() == 50, "50 parallel POSTs get 50 unique ids", null);
             r = call("GET", "/api/stock-value", null);
             check(r.body().equals("{\"items\":51,\"total\":35.00}"), "stock value after parallel POSTs (4 x 7.50 + 50 x 0.10)", r);
+
+            items.pauseNextGet();
+            var patch = http.sendAsync(HttpRequest.newBuilder(URI.create(base + "/api/items/1"))
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString("{\"qty\":9}")).build(),
+                    HttpResponse.BodyHandlers.ofString());
+            if (!items.read.await(5, TimeUnit.SECONDS)) throw new AssertionError("PATCH snapshot was not read");
+            r = call("PATCH", "/api/items/1", "{\"price\":8.50}");
+            check(r.statusCode() == 200, "concurrent price PATCH succeeds", r);
+            items.resume.countDown();
+            r = patch.get(5, TimeUnit.SECONDS);
+            check(r.statusCode() == 200, "paused qty PATCH succeeds", r);
+            r = call("GET", "/api/items/1", null);
+            check(r.body().equals("{\"id\":1,\"name\":\"Mug\",\"qty\":9,\"price\":8.50}"), "concurrent PATCHes retain both changes", r);
+            r = call("PATCH", "/api/items/1", "{\"name\":\"Changed\",\"qty\":-1}");
+            check(r.statusCode() == 400, "PATCH rejects an invalid field", r);
+            r = call("GET", "/api/items/1", null);
+            check(r.body().equals("{\"id\":1,\"name\":\"Mug\",\"qty\":9,\"price\":8.50}"), "invalid PATCH leaves all fields unchanged", r);
+
+            items.pauseNextGet();
+            patch = http.sendAsync(HttpRequest.newBuilder(URI.create(base + "/api/items/1"))
+                    .method("PATCH", HttpRequest.BodyPublishers.ofString("{\"qty\":10}")).build(),
+                    HttpResponse.BodyHandlers.ofString());
+            if (!items.read.await(5, TimeUnit.SECONDS)) throw new AssertionError("PATCH snapshot was not read");
+            r = call("DELETE", "/api/items/1", null);
+            check(r.statusCode() == 204, "DELETE during a paused PATCH succeeds", r);
+            items.resume.countDown();
+            r = patch.get(5, TimeUnit.SECONDS);
+            check(r.statusCode() == 404 && r.body().contains("item 1 not found"), "PATCH of a concurrently deleted item is 404", r);
+            r = call("GET", "/api/items/1", null);
+            check(r.statusCode() == 404, "PATCH does not restore a deleted item", r);
         } finally {
+            if (items.resume != null) items.resume.countDown();
             api.stop();
         }
         System.out.println(passed + " checks passed");

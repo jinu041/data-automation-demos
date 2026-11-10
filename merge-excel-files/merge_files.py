@@ -172,6 +172,14 @@ def sheet_ref(name):
     return name if name.isascii() and name.isalnum() else f"'{name}'"
 
 
+def keep_text(ws):
+    """Imported text that starts with '=' stays text. openpyxl would otherwise save it as a live formula."""
+    for row in ws.iter_rows(min_row=2):
+        for c in row:
+            if isinstance(c.value, str) and c.value.startswith("="):
+                c.data_type = "s"
+
+
 def write_xlsx(orders, log, path, n_files, lang="en"):
     L = LABELS[lang]
     wb = Workbook()
@@ -181,6 +189,7 @@ def write_xlsx(orders, log, path, n_files, lang="en"):
     ws.append(L["head"])
     for o in orders:
         ws.append([o[h] for h in HEAD])
+    keep_text(ws)
     n = max(len(orders) + 1, 2)
     for c in ws[1]:
         c.font, c.fill = hfont, hfill
@@ -223,6 +232,7 @@ def write_xlsx(orders, log, path, n_files, lang="en"):
     lg.append(L["log"])
     for line in log:
         lg.append(list(line))
+    keep_text(lg)
     for c in lg[1]:
         c.font, c.fill = hfont, hfill
     for col, width in zip("ABCD", (16, 6, 40, 70)):
@@ -379,6 +389,16 @@ def selftest():
             assert wb[s_name]["B4"].value == f"=COUNTA({o_ref}!A2:A31)"
             assert wb[s_name]["B10"].value.startswith(f"=COUNTIFS({o_ref}!B2:B31") and wb[l_name].max_row == 6
     assert sheet_ref("Orders") == "Orders" and sheet_ref("주문") == "'주문'" and sheet_ref("빠진 행") == "'빠진 행'"
+    with tempfile.TemporaryDirectory() as tmp:  # text that looks like a formula must stay text
+        o = {"Order ID": "9", "Date": dt.date(2026, 9, 1), "Customer": "=1+1", "Product": "Mug", "Qty": 1,
+             "Amount": 1.0, "Source file": "x.csv"}
+        out = Path(tmp) / "m.xlsx"
+        write_xlsx([o], [("x.csv", 3, "bad date", "=HYPERLINK(1)")], out, 1)
+        wb = load_workbook(out)
+        cust, raw = wb["Orders"]["C2"], wb["Log"]["D2"]
+        assert (cust.value, cust.data_type) == ("=1+1", "s"), (cust.value, cust.data_type)
+        assert (raw.value, raw.data_type) == ("=HYPERLINK(1)", "s"), (raw.value, raw.data_type)
+        assert wb["Summary"]["B4"].data_type == "f"  # the Summary's own formulas are untouched
     print("selftest ok")
 
 
@@ -400,7 +420,8 @@ def main():
         return print("wrote", ", ".join(p.name for p in input_files(a.make_samples)))
     if not a.folder:
         ap.error("give a folder, or --selftest / --check / --make-samples")
-    files = input_files(a.folder)
+    out = Path(a.out).resolve()
+    files = [p for p in input_files(a.folder) if p.resolve() != out]  # never merge last run's output back in
     if not files:
         sys.exit("no .xlsx or .csv files in " + a.folder)
     orders, log = merge(files, a.lang)

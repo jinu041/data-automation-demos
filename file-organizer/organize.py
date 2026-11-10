@@ -50,7 +50,8 @@ def free_name(target, taken):
 
 def plan(src, dest, by, recursive):
     files = sorted((p for p in (src.rglob("*") if recursive else src.iterdir())
-                    if p.is_file() and not p.name.startswith(".") and dest not in p.parents),
+                    if p.is_file() and dest not in p.parents
+                    and not any(part.startswith(".") for part in p.relative_to(src).parts)),  # skips .git/ etc.
                    key=lambda p: (p.stat().st_mtime, str(p)))  # oldest first, so the oldest copy is the one kept
     moves, seen, taken = [], set(), set()
     for p in files:
@@ -67,8 +68,15 @@ def plan(src, dest, by, recursive):
 
 def apply(moves, dest):
     dest.mkdir(parents=True, exist_ok=True)
-    log = dest / f"_organize_log_{dt.datetime.now():%Y%m%d-%H%M%S}.csv"
-    with open(log, "w", newline="", encoding="utf-8-sig") as f:
+    stamp, n = f"{dt.datetime.now():%Y%m%d-%H%M%S}", 1
+    while True:  # "x" never overwrites: two runs in the same second get _2, _3 ... instead of one undo log
+        log = dest / (f"_organize_log_{stamp}.csv" if n == 1 else f"_organize_log_{stamp}_{n}.csv")
+        try:
+            f = open(log, "x", newline="", encoding="utf-8-sig")
+            break
+        except FileExistsError:
+            n += 1
+    with f:
         w = csv.writer(f)
         w.writerow(["from", "to", "duplicate"])
         for src, dst, dup in moves:

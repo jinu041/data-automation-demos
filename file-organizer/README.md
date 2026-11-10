@@ -11,7 +11,8 @@
 - **Duplicates:** files with exactly the same bytes (SHA-256) are spotted. The oldest copy is sorted normally and the others go to `_duplicates`, so you decide what to delete.
 - **Name clashes:** if `report.pdf` is already taken, the next one becomes `report (2).pdf`. An existing file is never overwritten.
 - **Undo:** `--apply` writes `_organize_log_<time>.csv` (from, to, duplicate). `--undo <log>` moves everything back and removes the folders it created, if they are empty. It refuses to run if one of the original paths has been taken in the meantime.
-- Skips hidden files and the target folder itself; `--recursive` also takes files from subfolders.
+- Skips hidden files, anything inside hidden folders such as `.git`, and the target folder itself; `--recursive` also takes files from subfolders.
+- Each run gets its own log: two runs in the same second write `_organize_log_<time>.csv` and `_organize_log_<time>_2.csv`, never one over the other.
 
 ## Run it
 
