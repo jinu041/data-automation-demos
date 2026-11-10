@@ -106,8 +106,9 @@ def write_xlsx(rows, path, total, source=START):
     ws = wb.active
     ws.title = "Books"
     ws.append(HEAD)
-    for r in rows:
+    for i, r in enumerate(rows, 2):
         ws.append([r["title"], r["price"], r["rating"], "Yes" if r["in_stock"] else "No", r["url"]])
+        ws.cell(i, 1).data_type = ws.cell(i, 5).data_type = "s"
     n = len(rows) + 1
     hfont, hfill = Font(bold=True, color="FFFFFF"), PatternFill("solid", fgColor="2F4858")
     for c in ws[1]:
@@ -205,6 +206,14 @@ def selftest():
         write_csv(rows, Path(tmp) / "t.csv")
         lines = (Path(tmp) / "t.csv").read_text(encoding="utf-8-sig").splitlines()
         assert lines[0] == ",".join(HEAD) and lines[2].startswith("Tipping the Velvet,53.74,1,No,")
+        imported, _, _ = parse(FIXTURE.replace('title="A Light in the Attic"', 'title="=1+1"'), base)
+        imported[0]["url"] = "=HYPERLINK(1)"
+        write_xlsx(imported, p, total)
+        wb = load_workbook(p)
+        for ref, value in (("A2", "=1+1"), ("E2", "=HYPERLINK(1)")):
+            cell = wb["Books"][ref]
+            assert (cell.value, cell.data_type) == (value, "s"), (ref, cell.value, cell.data_type)
+        assert wb["Summary"]["B4"].data_type == "f"
     print("selftest ok")
 
 

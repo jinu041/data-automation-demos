@@ -93,12 +93,12 @@ public final class InventoryApi {
                         case "GET" -> send(ex, 200, item.json());
                         case "PATCH" -> {
                             Map<String, Object> in = Json.parseObject(body);
-                            Item updated = new Item(id,
-                                    in.containsKey("name") ? name(in.get("name")) : item.name(),
-                                    in.containsKey("qty") ? qty(in.get("qty")) : item.qty(),
-                                    in.containsKey("price") ? price(in.get("price")) : item.price());
-                            items.put(id, updated);
-                            send(ex, 200, updated.json());
+                            Item updated = items.computeIfPresent(id, (key, current) -> new Item(id,
+                                    in.containsKey("name") ? name(in.get("name")) : current.name(),
+                                    in.containsKey("qty") ? qty(in.get("qty")) : current.qty(),
+                                    in.containsKey("price") ? price(in.get("price")) : current.price()));
+                            send(ex, updated == null ? 404 : 200,
+                                    updated == null ? error("item " + id + " not found") : updated.json());
                         }
                         case "DELETE" -> {
                             items.remove(id);

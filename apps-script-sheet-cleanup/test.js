@@ -69,6 +69,52 @@ test('normalizers', () => {
   assert.equal(app.parseAmount('12만원'), null, 'never half-read a number');
 });
 
+test('amounts require complete money syntax; malformed expressions go to Issues', () => {
+  for (const [text, amount] of [
+    ['+42', 42], ['-42', -42], ['-$1,200.50', -1200.5], ['(£1,200.50)', -1200.5],
+    ['USD 1,200.50', 1200.5], ['42 GBP', 42], ['1,200원', 1200],
+  ]) assert.equal(app.parseAmount(text), amount, text);
+  const malformed = ['100-20', '1+2', '(12', '42)', '(-42)', '1,20', '1.2.3'];
+  for (const text of malformed) assert.equal(app.parseAmount(text), null, text);
+  const result = app.cleanRows(malformed.map((amount, i) =>
+    ['2026-11-03', 'Name', `lead${i}@example.com`, '', 'New', amount]));
+  assert.deepEqual(result.clean, []);
+  assert.deepEqual(result.issues, malformed.map((amount, i) => [i + 2, 'Amount', amount, 'not a number']));
+});
+
+test('inherited object properties are unknown statuses', () => {
+  for (const status of ['constructor', '__proto__']) assert.equal(app.normalizeStatus(status), '');
+  const result = app.cleanRows(['constructor', '__proto__'].map((status, i) =>
+    ['2026-11-03', 'Name', `lead${i}@example.com`, '', status, '10']));
+  assert.deepEqual(result.clean, []);
+  assert.deepEqual(result.issues, [
+    [2, 'Status', 'constructor', 'unknown status'], [3, 'Status', '__proto__', 'unknown status'],
+  ]);
+});
+
+test('Clean and Issues write imported formula strings as text', () => {
+  const rows = [
+    app.CONFIG.headers.slice(),
+    ['2026-11-03', '=SUM(A1)', '=lead@example.com', '=IMPORTXML("x","y")', 'New', '42'],
+    ['=TODAY()', 'Bad', '=SUM(A1)', '', '=UNKNOWN()', '=1+2'],
+  ];
+  const ss = new FakeSpreadsheet([new FakeSheet('Leads', rows.map(row => row.slice()))]);
+  global.SpreadsheetApp = { getActive: () => ss };
+  for (let run = 0; run < 2; run++) {
+    app.cleanUpSheet();
+    assert.deepEqual(ss.getSheetByName('Clean').data[1], [
+      '2026-11-03', "'=sum(a1)", "'=lead@example.com", "'=IMPORTXML(\"x\",\"y\")", 'New', 42,
+    ]);
+    assert.deepEqual(ss.getSheetByName('Issues').data.slice(1), [
+      [3, 'Email', "'=SUM(A1)", 'missing or not an e-mail'],
+      [3, 'Date', "'=TODAY()", 'not a date'],
+      [3, 'Status', "'=UNKNOWN()", 'unknown status'],
+      [3, 'Amount', "'=1+2", 'not a number'],
+    ]);
+  }
+  assert.deepEqual(ss.getSheetByName('Leads').data, rows, 'the input sheet stays unchanged');
+});
+
 test('Korean settings: Korean sheet names, statuses, issue texts and summary', () => {
   const saved = { ...app.CONFIG };
   Object.assign(app.CONFIG, app.CONFIG_KO);

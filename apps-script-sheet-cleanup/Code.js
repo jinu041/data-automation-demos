@@ -77,18 +77,21 @@ function normalizeDate(v) {
 }
 
 function normalizeStatus(s) {
-  return CONFIG.statuses[String(s || '').trim().toLowerCase().replace(/\s+/g, ' ')] || '';
+  const key = String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  return Object.prototype.hasOwnProperty.call(CONFIG.statuses, key) ? CONFIG.statuses[key] : '';
 }
 
 // '$1,200.00', '₩120,000', '1,200원' and '(42.00)' are numbers; text such as '12만원' or 'abc' is null (an issue),
 // so a value is never half-read.
 function parseAmount(v) {
   if (typeof v === 'number') return v;
-  const s = String(v || '').trim();
+  let s = String(v || '').trim();
   if (!s) return 0;
-  const neg = /^\(.*\)$/.test(s) || s.startsWith('-');
-  const core = s.replace(/\b(usd|krw|eur|gbp)\b/gi, '').replace(/[\s,$€£₩¥원()+-]/g, '');
-  return /^\d+(\.\d+)?$/.test(core) ? (neg ? -1 : 1) * parseFloat(core) : null;
+  const accounting = s.startsWith('(') && s.endsWith(')');
+  if (accounting) s = s.slice(1, -1).trim();
+  const match = s.match(/^([+-]?)\s*(?:(?:usd|krw|eur|gbp|[$€£₩¥원])\s*)?((?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?)\s*(?:usd|krw|eur|gbp|[$€£₩¥원])?$/i);
+  if (!match || (accounting && match[1])) return null;
+  return (accounting || match[1] === '-' ? -1 : 1) * Number(match[2].replace(/,/g, ''));
 }
 
 // rows: values under the header. Returns clean rows (one per e-mail, newest date wins), issues and a duplicate count.
@@ -153,8 +156,9 @@ function onOpen() {
 function writeSheet(ss, name, header, rows) {
   const sh = ss.getSheetByName(name) || ss.insertSheet(name);
   sh.clearContents();
-  sh.getRange(1, 1, 1, header.length).setValues([header]);
-  if (rows.length) sh.getRange(2, 1, rows.length, header.length).setValues(rows);
+  const values = [header, ...rows].map(row => row.map(value =>
+    typeof value === 'string' && value.startsWith('=') ? "'" + value : value));
+  sh.getRange(1, 1, values.length, header.length).setValues(values);
   return sh;
 }
 
