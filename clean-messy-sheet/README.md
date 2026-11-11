@@ -1,5 +1,7 @@
 # Clean a messy sales sheet (Python)
 
+![Messy sheet cleanup cover](screenshots/cover.png)
+
 `clean_sheet.py` turns a hand-typed sales log into one flat table you can sort, filter and pivot. Merged cells are filled in, every date becomes a real date, names typed in two columns are joined, and the rows that break a pivot table (subtotals, repeated headers, blank rows, rows pasted twice) are removed. Anything it can't decide for sure goes on a **Check** sheet instead of being guessed, and every change is listed on a **Log** sheet. The messy file is never overwritten.
 
 ## What it does
@@ -29,7 +31,13 @@ uv run --with openpyxl python clean_sheet.py --check clean_recalculated.xlsx
 
 `sample/messy_sales.xlsx` is a made-up sales log for September and October 2026 with 30 sales and the problems hand-kept sheets have: a merged title, Region merged down two blocks, dates typed six ways (plus one that reads two ways and one that can't exist), names in two columns with stray caps and spaces, amounts as text, a refund in brackets, `n/a`, `2 boxes`, two subtotal rows and a grand total, a repeated header, a blank row, two rows pasted a second time and a corrected entry typed under the original.
 
+![The messy sheet, first rows](screenshots/before.png)
+
 The result, `sample/clean_sales.xlsx`, keeps 31 rows (the 30 sales plus the corrected entry), removes 7 and lists 5 cells to check.
+
+![The Sales sheet after cleaning](screenshots/after.png)
+
+![The Check sheet](screenshots/check.png)
 
 ## How it was checked
 
