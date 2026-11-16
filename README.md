@@ -1,6 +1,6 @@
 # Data and automation demos
 
-Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++ and Java tools that clean, convert, collect and serve data. Sample data is made up, except the public ECB exchange rates and the book titles from a public scraping practice site.
+Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++ and Java tools that clean, convert, collect and serve data. Sample data is made up, except the public ECB exchange rates, the book titles from a public scraping practice site and the public-domain story in the ebook demo.
 
 | Demo | What it shows |
 |---|---|
@@ -16,6 +16,7 @@ Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++
 | [java-inventory-api](java-inventory-api) | Java: small inventory REST API with the JDK only, input validation, exact money math and HTTP tests |
 | [korean-aso-sample](korean-aso-sample) | Korean App Store and Google Play listing for a fictional app, with every field checked against the store limits and an English back-translation |
 | [korean-l10n-qa](korean-l10n-qa) | Python, standard library only: checks an English → Korean string table for placeholders, Korean particle traps, glossary terms, consistency, numbers and UI length limits |
+| [ebook-epub-demo](ebook-epub-demo) | Reflowable EPUB 3 for Kindle from a public-domain short story (Poe, 1843): clickable table of contents, title and closing artwork that scale to the screen, a separate 1600 × 2560 cover JPEG, and 0 errors / 0 warnings in EPUBCheck 5.1.0 |
 
 More demos (spreadsheets and Python) are in [portfolio-demos](https://github.com/jinu041/portfolio-demos).
 
