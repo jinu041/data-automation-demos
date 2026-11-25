@@ -20,6 +20,7 @@ from pathlib import Path
 
 import pymupdf
 from openpyxl import Workbook, load_workbook
+from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Alignment, Font, PatternFill
 
 HERE = Path(__file__).resolve().parent
@@ -322,7 +323,7 @@ def build_xlsx(docs, path, label):
     ws.title = "Documents"
     _header(ws, ["File", "Type", "Vendor", "Doc no.", "Date", "Currency", "Items", "Subtotal", "Tax", "Total",
                  "Line sum", "Check (Python)", "Check (Excel)", "Method"],
-            [33, 12, 28, 13, 11, 9, 7, 11, 10, 11, 11, 15, 13, 15])
+            [33, 12, 28, 13, 11, 9, 7, 11, 10, 11, 11, 36, 13, 15])
     li = wb.create_sheet("Line items")
     _header(li, ["File", "Vendor", "Description", "Details", "Qty", "Unit price", "Amount", "Line check"],
             [33, 28, 28, 18, 8, 11, 11, 11])
@@ -344,8 +345,13 @@ def build_xlsx(docs, path, label):
             q = li.max_row + 1
             li.append([d["file"], d["vendor"], x["description"], x["details"], x["qty"], x["unit_price"], x["amount"],
                        f'=IF(ROUND(E{q}*F{q}-G{q},2)=0,"OK","CHECK")'])
+            li.cell(q, 5).number_format = "#,##0" if x["qty"] == int(x["qty"]) else "#,##0.00"
             for c in (6, 7):
                 li.cell(q, c).number_format = MONEY_FMT
+    bad = CellIsRule(operator="equal", formula=['"CHECK"'],  # shades the formulas' CHECK
+                     fill=PatternFill("solid", start_color="F8D7D3", end_color="F8D7D3"))  # rules read the end colour
+    ws.conditional_formatting.add(f"M2:M{ws.max_row}", bad)
+    li.conditional_formatting.add(f"H2:H{li.max_row}", bad)
     ws.auto_filter.ref = f"A1:N{ws.max_row}"
     li.auto_filter.ref = f"A1:H{li.max_row}"
     note = Font(italic=True, color="6B7280")
@@ -407,6 +413,7 @@ def selftest():
         assert wb["Documents"]["M2"].value.startswith("=IF(AND(COUNTIFS('Line items'!$A:$A,A2,'Line items'!$H:$H,\"CHECK\")=0,")
         assert wb["Documents"]["L6"].value == "MISMATCH: Instant coffee: qty x price"  # the seller's typo in 05
         assert wb["Line items"]["H2"].value == '=IF(ROUND(E2*F2-G2,2)=0,"OK","CHECK")'
+        assert [str(c.sqref) for c in wb["Line items"].conditional_formatting] == ["H2:H22"]
         assert wb.properties.creator in ("", None) and wb.properties.lastModifiedBy in ("", None)
     print("selftest OK: 6 PDFs in 3 layouts read exactly by the rules, totals check, live parsing and workbook checked")
 
