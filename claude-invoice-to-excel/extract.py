@@ -418,7 +418,7 @@ def selftest():
         assert wb["Line items"]["H2"].value == '=IF(ROUND(E2*F2-G2,2)=0,"OK","CHECK")'
         assert [str(c.sqref) for c in wb["Line items"].conditional_formatting] == ["H2:H22"]
         assert wb.properties.creator in ("", None) and wb.properties.lastModifiedBy in ("", None)
-    print("selftest OK: 6 PDFs in 3 layouts read exactly by the rules, totals check, live parsing and workbook checked")
+    print("selftest OK: 6 PDFs read exactly, totals check, live parsing and workbook checked")
 
 
 def main():
