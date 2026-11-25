@@ -17,6 +17,7 @@ Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++
 | [korean-aso-sample](korean-aso-sample) | Korean App Store and Google Play listing for a fictional app, with every field checked against the store limits and an English back-translation |
 | [korean-l10n-qa](korean-l10n-qa) | Python, standard library only: checks an English → Korean string table for placeholders, Korean particle traps, glossary terms, consistency, numbers and UI length limits |
 | [ebook-epub-demo](ebook-epub-demo) | Reflowable EPUB 3 for Kindle from a public-domain short story (Poe, 1843): clickable table of contents, title and closing artwork that scale to the screen, a separate 1600 × 2560 cover JPEG, and 0 errors / 0 warnings in EPUBCheck 5.1.0 |
+| [claude-inquiry-triage](claude-inquiry-triage) | Python + Claude API: sorts customer messages into an Excel review queue (category, urgency, sentiment, summary, reply draft) using structured outputs, with a rule-based mode that runs without an API key |
 
 More demos (spreadsheets and Python) are in [portfolio-demos](https://github.com/jinu041/portfolio-demos).
 

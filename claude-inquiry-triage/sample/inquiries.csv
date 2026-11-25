@@ -1,0 +1,61 @@
+ID,Received,Channel,Customer,Message
+1,2026-11-01,Email,Customer 001,Do you ship to Hawaii? Is there an extra shipping fee?
+2,2026-11-08,Review,Customer 002,This is my second order and the packaging was careful again. Thank you!
+3,2026-11-05,Email,Customer 003,I need the umbrella by this Saturday. Can you get it to me in time? It's urgent.
+4,2026-11-06,Chat,Customer 004,Do you offer gift wrapping for the cushion cover?
+5,2026-11-11,Chat,Customer 005,"The mug looks very different from the photos, so I want to return it. How do I do that?"
+6,2026-11-07,Email,Customer 006,Will the towel set be restocked in other colors?
+7,2026-11-07,Chat,Customer 007,I ordered the umbrella 8 days ago and it still says 'preparing to ship'. When will it arrive?
+8,2026-11-10,Email,Customer 008,The sole of the running shoes came off after one week. I'm upset.
+9,2026-11-13,Email,Customer 009,I never got a payment confirmation email. Did my order go through?
+10,2026-11-07,Web form,Customer 010,The running shoes feel narrow. Can I swap them for a half size up?
+11,2026-11-09,Chat,Customer 011,"Shipping was fast, but the cordless humidifier has a crack in it. What should I do?"
+12,2026-11-04,Web form,Customer 012,What are your support hours?
+13,2026-11-11,Email,Customer 013,I used the camping chair once and the leg joint snapped.
+14,2026-11-14,Review,Customer 014,Your support person explained everything kindly and fixed my issue fast. Thanks.
+15,2026-11-11,Review,Customer 015,The knit cardigan is great quality. I'm buying another one as a gift for my family.
+16,2026-11-01,Chat,Customer 016,It was supposed to arrive yesterday and the tracking hasn't moved in two days.
+17,2026-11-08,Chat,Customer 017,"Tracking says delivered, but there's nothing at my door. Where did it go?"
+18,2026-11-01,Email,Customer 018,Can you issue a VAT invoice? I'm buying for my business.
+19,2026-11-12,Chat,Customer 019,Do you take bulk orders? I'd need about 50.
+20,2026-11-02,Email,Customer 020,The box arrived wet and now there's a stain on the cushion cover.
+21,2026-11-04,Email,Customer 021,"If I cancel part of my order, how will the refund work?"
+22,2026-11-07,Web form,Customer 022,I hit the exchange button twice by mistake. Please cancel one of them.
+23,2026-11-12,Chat,Customer 023,The knit cardigan runs smaller than I expected. I'd like to exchange it for one size up.
+24,2026-11-03,Email,Customer 024,Is the lunch box dishwasher safe?
+25,2026-11-04,Web form,Customer 025,The lid of the tumbler doesn't close properly. It leaks.
+26,2026-11-12,Email,Customer 026,Can I put hot drinks in the lunch box?
+27,2026-11-06,Email,Customer 027,I entered the wrong account for my refund. Can I change it?
+28,2026-11-06,Review,Customer 028,The lunch box is light and sturdy. Really good.
+29,2026-11-09,Email,Customer 029,Can I change the delivery address to my office? I don't think it has shipped yet.
+30,2026-11-09,Chat,Customer 030,"I paid by bank transfer, but the order still says 'awaiting payment'."
+31,2026-11-14,Web form,Customer 031,I ordered the umbrella in two colors and want to return one. When will it be picked up?
+32,2026-11-14,Chat,Customer 032,What are the exact dimensions of the cordless humidifier? I couldn't find them on the product page.
+33,2026-11-06,Web form,Customer 033,I opened the knit cardigan but never used it. Can I still return it?
+34,2026-11-02,Email,Customer 034,I canceled my order 7 days ago and still haven't got my refund.
+35,2026-11-04,Chat,Customer 035,I usually wear a US 9. Which size of the running shoes should I get?
+36,2026-11-03,Chat,Customer 036,Do I have to pay for return shipping? I just changed my mind about the camping chair.
+37,2026-11-11,Chat,Customer 037,Order A17156 keeps getting a later ship date. Can you give me an exact date?
+38,2026-11-07,Review,Customer 038,"Wow, the packaging was so careful. Got it in perfect shape."
+39,2026-11-13,Chat,Customer 039,The tracking number doesn't show anything. Could you check order A46724?
+40,2026-11-13,Email,Customer 040,When do my reward points expire?
+41,2026-11-03,Review,Customer 041,I use the knit cardigan every day. I'll definitely order again.
+42,2026-11-07,Web form,Customer 042,"I ordered the knit cardigan and the lunch box together, but only the knit cardigan arrived. Is the rest coming separately?"
+43,2026-11-02,Chat,Customer 043,I think I was charged twice. My card statement shows the same amount two times.
+44,2026-11-08,Review,Customer 044,"The tumbler is even prettier than I expected, and it arrived fast. Very happy."
+45,2026-11-05,Chat,Customer 045,How much does the cordless humidifier weigh? Is it easy to carry around?
+46,2026-11-05,Chat,Customer 046,"I asked for a return, but no one has come to pick it up yet."
+47,2026-11-12,Chat,Customer 047,Does the cordless humidifier use a lot of power? What's the wattage?
+48,2026-11-14,Email,Customer 048,"The cordless humidifier won't turn on, even after charging it."
+49,2026-11-11,Email,Customer 049,How do I get a receipt for my order?
+50,2026-11-06,Chat,Customer 050,The cordless humidifier arrived broken inside the box. I can send photos. Really disappointed.
+51,2026-11-09,Chat,Customer 051,"If I return something I paid for with store credit, how do I get the credit back?"
+52,2026-11-05,Review,Customer 052,The cordless humidifier matches the photos exactly. Love it.
+53,2026-11-05,Web form,Customer 053,One of the ribs on the umbrella was bent right out of the box.
+54,2026-11-09,Email,Customer 054,I got the knit cardigan as a gift. Can I exchange it for a different color?
+55,2026-11-07,Email,Customer 055,What is the knit cardigan made of? Can it go in the washing machine?
+56,2026-11-14,Email,Customer 056,Can I buy your products in a physical store?
+57,2026-11-09,Review,Customer 057,Third time buying the tumbler. Still the one I trust.
+58,2026-11-09,Web form,Customer 058,I can't find where to change my password.
+59,2026-11-06,Chat,Customer 059,"I paid in installments. If I cancel, are the installments canceled too?"
+60,2026-11-02,Email,Customer 060,The stitching on the knit cardigan is coming apart. Is this really new?
