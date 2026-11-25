@@ -141,8 +141,11 @@ def make_pdf(doc):
         text(360, bottom + 34 + i * 22, lab, 11, bold=i == 2)
         text(RIGHT - 6, bottom + 34 + i * 22, f"{st['sym']}{val:,.2f}", 11, bold=i == 2, right=True)
     text(50, 760, "Made-up example: not a real company or transaction.", 8.5, color=(0.5, 0.5, 0.5))
-    pdf.set_metadata({})  # no producer, author or dates in the file
-    return pdf.tobytes(garbage=3, deflate=True)
+    pdf.set_metadata({})  # no author, producer or dates in the file
+    if "Info" in pdf.xref_get_keys(pdf.pdf_catalog()):  # MuPDF also leaves a Producer note in the catalog
+        pdf.xref_set_key(pdf.pdf_catalog(), "Info", "null")
+    raw = pdf.tobytes(garbage=3, deflate=True)
+    return re.sub(rb"% Written by [^\n]*", lambda m: b"%" + b" " * (len(m[0]) - 1), raw)  # same length keeps offsets
 
 
 def make_input(folder=SAMPLE):
@@ -386,6 +389,7 @@ def selftest():
     with tempfile.TemporaryDirectory() as tmp:
         paths = make_input(Path(tmp))
         for p in paths:
+            assert b"MuPDF" not in p.read_bytes(), p
             with pymupdf.open(p) as pdf:
                 meta = pdf.metadata
             assert not any(meta.get(k) for k in ("author", "creator", "producer", "creationDate")), meta
