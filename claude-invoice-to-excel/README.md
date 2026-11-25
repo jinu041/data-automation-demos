@@ -14,7 +14,7 @@ Either way, the numbers are checked in Python with exact decimal math (cents, ro
 - **Documents**: file, type, vendor, document number, date (a real Excel date), currency, number of lines, subtotal, tax, total, sum of the lines, the Python check, an Excel check formula and the method. A failed Python check is shaded red.
 - **Line items**: file, vendor, description, details, quantity, unit price, amount and a line check formula.
 
-The Excel checks are formulas, so they update when someone corrects a value by hand.
+The Excel checks are formulas, so they update when someone corrects a value by hand, and a failed one is shaded red too.
 
 ## Run it
 

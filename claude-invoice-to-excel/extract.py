@@ -10,6 +10,8 @@ then check the math: qty x price per line, lines = subtotal, subtotal + tax = to
 All companies, documents and amounts are made up. Only the text of each PDF is sent in live mode.
 """
 import argparse
+import contextlib
+import io
 import json
 import re
 import sys
@@ -400,7 +402,8 @@ def selftest():
 
         # live parsing: one cut-off batch is split and retried, one declined batch falls back to the rules
         fake = _FakeClient(["max_tokens", "end_turn", "end_turn", "refusal"])
-        live = parse_live(paths, client=fake)
+        with contextlib.redirect_stdout(io.StringIO()):  # keep the simulated refusal's notice out of the output
+            live = parse_live(paths, client=fake)
         assert fake.calls == [3, 1, 2, 3], fake.calls
         assert [x["method"] for x in live] == ["Claude"] * 3 + ["Rules (fallback)"] * 3
         assert all(x == dict(truth(doc), method=x["method"]) for x, doc in zip(live, DOCS))
