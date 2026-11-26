@@ -1,0 +1,148 @@
+table sales
+	lineageTag: 0f221804-7b2e-54c1-8e83-17a0bb3cad6b
+
+	measure 'Total Revenue' = SUM(sales[Revenue])
+		formatString: \$#,0
+		lineageTag: b86879ec-70fd-5ea9-98a7-bb3157b094a6
+
+	measure 'Gross Margin %' = DIVIDE([Total Revenue] - SUM(sales[Cost]), [Total Revenue])
+		formatString: 0.0%
+		lineageTag: 9b78cca8-ebf7-5193-a163-9dfa128ecd04
+
+	measure Orders = DISTINCTCOUNT(sales[OrderID])
+		formatString: #,0
+		lineageTag: 7c22ff22-ea6c-5220-bffd-7b42e5ddae22
+
+	measure 'Avg Order Value' = DIVIDE([Total Revenue], [Orders])
+		formatString: \$#,0.00
+		lineageTag: 228d70ef-2021-5c96-81f7-d89e1d7fd88b
+
+	column OrderID
+		dataType: string
+		lineageTag: 4493d596-8af3-508c-8309-5fe093f23c19
+		summarizeBy: none
+		sourceColumn: OrderID
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderDate
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 049aea23-91c5-5dcb-b290-c17a3a4e9baf
+		summarizeBy: none
+		sourceColumn: OrderDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Month
+		dataType: dateTime
+		formatString: mmm yyyy
+		lineageTag: 99c3c5fa-05ea-5735-a368-62d7d8bcb837
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Region
+		dataType: string
+		lineageTag: e6dd6a9f-cf4b-5191-a9b2-d59a6c2d5b0a
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column Channel
+		dataType: string
+		lineageTag: 31b571a4-2621-52ce-a0af-5ac6f21dd729
+		summarizeBy: none
+		sourceColumn: Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 7ede2da0-80b5-5e24-a40e-a5a2dfaa1c68
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product
+		dataType: string
+		lineageTag: 5069edb5-8cec-5245-ae4b-3545fb89d4cb
+		summarizeBy: none
+		sourceColumn: Product
+
+		annotation SummarizationSetBy = Automatic
+
+	column Units
+		dataType: int64
+		formatString: #,0
+		lineageTag: a9bb25a2-2938-53cf-ac1c-7a7a39bf239b
+		summarizeBy: sum
+		sourceColumn: Units
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitPrice
+		dataType: double
+		formatString: \$#,0.00
+		lineageTag: 4fe99cba-7822-5e77-ab3b-661d9b2a88e8
+		summarizeBy: none
+		sourceColumn: UnitPrice
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitCost
+		dataType: double
+		formatString: \$#,0.00
+		lineageTag: 7de4c929-ade0-5af5-b1cb-38f843ecd417
+		summarizeBy: none
+		sourceColumn: UnitCost
+
+		annotation SummarizationSetBy = Automatic
+
+	column Revenue
+		dataType: double
+		formatString: \$#,0.00
+		lineageTag: c31baa1c-4108-5f66-8042-6dec0eb946e9
+		summarizeBy: sum
+		sourceColumn: Revenue
+
+		annotation SummarizationSetBy = Automatic
+
+	column Cost
+		dataType: double
+		formatString: \$#,0.00
+		lineageTag: afc186dd-f46e-5936-b3d8-d8078c49bbb3
+		summarizeBy: sum
+		sourceColumn: Cost
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthLabel
+		dataType: string
+		lineageTag: 101a0c1d-03bc-5fe2-823a-71da13815f3b
+		summarizeBy: none
+		sourceColumn: MonthLabel
+		sortByColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	partition sales = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataFile), [Delimiter=",", Columns=12, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"OrderID", type text}, {"OrderDate", type date}, {"Month", type date}, {"Region", type text}, {"Channel", type text}, {"Category", type text}, {"Product", type text}, {"Units", Int64.Type}, {"UnitPrice", type number}, {"UnitCost", type number}, {"Revenue", type number}, {"Cost", type number}}),
+				    Labeled = Table.AddColumn(Typed, "MonthLabel", each Date.ToText([Month], [Format="MMM yyyy", Culture="en-US"]), type text)
+				in
+				    Labeled
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,5 @@
+expression DataFile = "C:\powerbi-sales-dashboard\data\sales.csv" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: c066835a-dc3d-5e94-b6e6-39d4f00cde3c
+
+	annotation PBI_ResultType = Text
+

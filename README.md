@@ -1,6 +1,6 @@
 # Data and automation demos
 
-Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++ and Java tools that clean, convert, collect and serve data. Sample data is made up, except the public ECB exchange rates, the book titles from a public scraping practice site and the public-domain story in the ebook demo.
+Small, tested demos: spreadsheets that do the math, a Power BI report, plus Python, JavaScript, C++ and Java tools that clean, convert, collect and serve data. Sample data is made up, except the public ECB exchange rates, the book titles from a public scraping practice site and the public-domain story in the ebook demo.
 
 | Demo | What it shows |
 |---|---|
@@ -21,6 +21,7 @@ Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++
 | [html-email-template](html-email-template) | Hand-coded HTML promo email: table layout and inline styles, columns that stack on phones, a button Outlook can draw, dark mode, and ready-to-paste copies for Mailchimp, Klaviyo and Brevo |
 | [n8n-lead-intake](n8n-lead-intake) | n8n workflow: website leads cleaned and checked, repeats dropped, scored with plain rules, hot leads sent to Slack and everything logged to Google Sheets, with a self-test that runs it through the n8n command line |
 | [n8n-invoice-pdf-to-sheet](n8n-invoice-pdf-to-sheet) | n8n workflow: invoice PDFs from email attachments turned into one spreadsheet row per line item (Excel file or Google Sheets), with a cents-exact sum check that sends a bad invoice to a "Check by hand" tab |
+| [powerbi-sales-dashboard](powerbi-sales-dashboard) | Power BI: one-page sales dashboard (KPI cards, revenue by month, channel, product and region, with a Region filter) saved as a Power BI Project, so the DAX measures and every visual are text in git; a script asks the open model for 27 numbers and checks them against Python |
 | [claude-invoice-to-excel](claude-invoice-to-excel) | Python + Claude API: pulls vendor, date, line items and totals out of quote and invoice PDFs into Excel using structured outputs, then checks the math with exact decimals and Excel formulas (it catches a seller's typo in the sample) |
 
 More demos (spreadsheets and Python) are in [portfolio-demos](https://github.com/jinu041/portfolio-demos).
