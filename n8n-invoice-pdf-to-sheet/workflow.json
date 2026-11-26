@@ -1,0 +1,348 @@
+{
+  "id": "invoicePdfDemo01",
+  "name": "Invoice PDFs from email to a spreadsheet, with a sum check",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "i01",
+      "name": "Run demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Two made-up mails shaped like the Gmail trigger's output: attachments arrive as attachment_0, attachment_1, ...\nconst PDF = {\"HP-2207.pdf\": \"JVBERi0xLjcKJcK1wrYKCjEgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzIDIgMCBSPj4KZW5kb2JqCgoyIDAgb2JqCjw8L1R5cGUvUGFnZXMvQ291bnQgMS9LaWRzWzQgMCBSXT4+CmVuZG9iagoKMyAwIG9iago8PC9Gb250PDwvaGVibyA1IDAgUi9oZWx2IDcgMCBSPj4+PgplbmRvYmoKCjQgMCBvYmoKPDwvVHlwZS9QYWdlL01lZGlhQm94WzAgMCA1OTUgODQyXS9Sb3RhdGUgMC9SZXNvdXJjZXMgMyAwIFIvUGFyZW50IDIgMCBSL0NvbnRlbnRzWzYgMCBSIDggMCBSIDkgMCBSIDEwIDAgUiAxMSAwIFIgMTIgMCBSIDEzIDAgUiAxNCAwIFIgMTUgMCBSIDE2IDAgUiAxNyAwIFIgMTggMCBSIDE5IDAgUiAyMCAwIFIgMjEgMCBSIDIyIDAgUiAyMyAwIFIgMjQgMCBSIDI1IDAgUiAyNiAwIFIgMjcgMCBSIDI4IDAgUiAyOSAwIFIgMzAgMCBSIDMxIDAgUiAzMiAwIFIgMzMgMCBSXT4+CmVuZG9iagoKNSAwIG9iago8PC9UeXBlL0ZvbnQvU3VidHlwZS9UeXBlMS9CYXNlRm9udC9IZWx2ZXRpY2EtQm9sZC9FbmNvZGluZy9XaW5BbnNpRW5jb2Rpbmc+PgplbmRvYmoKCjYgMCBvYmoKPDwvTGVuZ3RoIDg1L0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nOMq5HIK4TJUMABCQwVTAwVzcyOFkFwu/YzUpHwFQwuFkDSFaBsTCzNDcyMzI7M0cyMjA1MDINvSLNXcxMjAxNgszSjVLjbEi8s1hCuQCwC9ERHqCmVuZHN0cmVhbQplbmRvYmoKCjcgMCBvYmoKPDwvVHlwZS9Gb250L1N1YnR5cGUvVHlwZTEvQmFzZUZvbnQvSGVsdmV0aWNhL0VuY29kaW5nL1dpbkFuc2lFbmNvZGluZz4+CmVuZG9iagoKOCAwIG9iago8PC9MZW5ndGggOTkvRmlsdGVyL0ZsYXRlRGVjb2RlPj4Kc3RyZWFtCnjaFYmxCoNgDAb3PEXewCSaLy2IQ6FLNyGbONlfOrSDi89vyi3HHR30SFKWQtmFw43zR92nfU9W4dx5GaHoiz0cLYboB8ENGgarZiFl9/+xBo86eIdgg09rvuiZNNMFtewXiQplbmRzdHJlYW0KZW5kb2JqCgo5IDAgb2JqCjw8L0xlbmd0aCA2OC9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeJzjKuRyCuEyVDAAQkMFEwMDBXNzI4WQXC79jNSkfAVDC4WQNIVoGxNLk1RTM5M0IG1sYmoXG+LF5RrCFcgFAK+yDhcKZW5kc3RyZWFtCmVuZG9iagoKMTAgMCBvYmoKPDwvTGVuZ3RoIDkwL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nOMq5HIK4TJUMABCQwUTAwMFc1MDhZBcLv2M1JwyBUMgO00h2sbE0izV3MwszczSzNjM1MjALNUszTjRyMDEwtTAKMXYCAgNjM3tYkO8uFxDuAK5AE7pE7UKZW5kc3RyZWFtCmVuZG9iagoKMTEgMCBvYmoKPDwvTGVuZ3RoIDgxL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nOMq5HIK4TJUMABCQwUTAwMFc2MzhZBcLv2M1JwyBUMDhZA0hWgbExMzQ3MTM1PjRCMDYyNjEDYzSjE2NDYEkwZ2sSFeXK4hXIFcAMfkEcQKZW5kc3RyZWFtCmVuZG9iagoKMTIgMCBvYmoKPDwvTGVuZ3RoIDExOC9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeNo1jDEKAlEMRPucIjcwyU8mK4jFgo3dwu8WC1n9WGhh4/mNhUw18x5Db5o7KUtFOYRTjPuLdo/788Mq3AevBzfssWEzScdoVxO3/G2JKT0TmkCYRKsW8CLDym7arNzICYpbSn38LUMg0o+XfqZTp4W+SDcelAplbmRzdHJlYW0KZW5kb2JqCgoxMyAwIG9iago8PC9MZW5ndGggNzYvRmlsdGVyL0ZsYXRlRGVjb2RlPj4Kc3RyZWFtCnic4yrkcgrhMlQwAEJDBVMDBTMzI4WQXC79jNSkfAVDA4WQNIVoGxMTM1NzYzNjcyMzS3MDcxMzS7M0s1S72BAvLtcQrkAuABJ1D4wKZW5kc3RyZWFtCmVuZG9iagoKMTQgMCBvYmoKPDwvTGVuZ3RoIDYxL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nOMq5HIK4TJUMABCQwVjYwMFMzMjhZBcLv2M1KR8BUMDhZA0hWgbU0NzE3NLu9gQLy7XEK5ALgBBWwwICmVuZHN0cmVhbQplbmRvYmoKCjE1IDAgb2JqCjw8L0xlbmd0aCA3NS9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeJzjKuRyCuEyVDAAQkMFY0sDBTMzI4WQXC79jNSkfAVDA4WQNIVoG1NTs1QzS3MTIwNzA3MjM0szYzNTu9gQLy7XEK5ALgADJg8hCmVuZHN0cmVhbQplbmRvYmoKCjE2IDAgb2JqCjw8L0xlbmd0aCA2Ny9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeJzjKuRyCuEyVDAAQkMFEwsDBTMzI4WQXC79jNSkfAVDA4WQNIVoGxNDsxSzNHNTs1RzE7vYEC8u1xCuQC4AltsN2gplbmRzdHJlYW0KZW5kb2JqCgoxNyAwIG9iago8PC9MZW5ndGggMzQvRmlsdGVyL0ZsYXRlRGVjb2RlPj4Kc3RyZWFtCnic4yrkMjVQMDM1U8jlMjUxBbNyuAwU3BWCuQK5AFhcBacKZW5kc3RyZWFtCmVuZG9iagoKMTggMCBvYmoKPDwvTGVuZ3RoIDkxL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp42g2IOQqAQAwA+7wiPzDHboIgFoKNnZBOrGTFQgsb32+YYoaBF6YARkoYK6EVwnigu9r9IWefuA1FvLpab83SrkKmxi5Wsg8hrUpKQp7fddxjgTlghR+/bhRYCmVuZHN0cmVhbQplbmRvYmoKCjE5IDAgb2JqCjw8L0xlbmd0aCA1Ni9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeJzjKuRyCuEyVDAAQkMFY2MDBTMTA4WQXC79jNScMgVDIDtNIdrG2MguNsSLyzWEK5ALABPzCzkKZW5kc3RyZWFtCmVuZG9iagoKMjAgMCBvYmoKPDwvTGVuZ3RoIDY0L0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nOMq5HIK4TJUMABCQwVjSwMFMxMDhZBcLv2M1JwyBUMgO00h2sbYxNjUKNXYwNjALjbEi8s1hCuQCwB2tQ0GCmVuZHN0cmVhbQplbmRvYmoKCjIxIDAgb2JqCjw8L0xlbmd0aCA2NC9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeJzjKuRyCuEyVDAAQkMFEwsDBTMTA4WQXC79jNScMgVDIDtNIdrG2NLYwCjV2MDYwC42xIvLNYQrkAsAdsANBgplbmRzdHJlYW0KZW5kb2JqCgoyMiAwIG9iago8PC9MZW5ndGggODkvRmlsdGVyL0ZsYXRlRGVjb2RlPj4Kc3RyZWFtCnicFcIxCoRADAXQPqfIDfxJnERh2UKwsRPSidWgWGixjed35T360ZAkjD/hAnbpOC9qju28WcC58/JpxYrC3Wv0XkLDtCpMtBpeioBb2HfNicakmR5N4xM/CmVuZHN0cmVhbQplbmRvYmoKCjIzIDAgb2JqCjw8L0xlbmd0aCA1Ny9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeJzjKuRyCuEyVDAAQkMFY2MDBTNDC4WQXC79jNScMgVDA4WQNIVoG2NDu9gQLy7XEK5ALgAUgAs9CmVuZHN0cmVhbQplbmRvYmoKCjI0IDAgb2JqCjw8L0xlbmd0aCA2Ny9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeJzjKuRyCuEyVDAAQkMFY0sDBTNDC4WQXC79jNScMgVDA4WQNIVoG2NDYyNjA6NUYwNjA7vYEC8u1xCuQC4AkJ0NaAplbmRzdHJlYW0KZW5kb2JqCgoyNSAwIG9iago8PC9MZW5ndGggNjcvRmlsdGVyL0ZsYXRlRGVjb2RlPj4Kc3RyZWFtCnic4yrkcgrhMlQwAEJDBRMLAwUzQwuFkFwu/YzUnDIFQwOFkDSFaBtjQ2MjYwOjVGMDYwO72BAvLtcQrkAuAJCeDWgKZW5kc3RyZWFtCmVuZG9iagoKMjYgMCBvYmoKPDwvTGVuZ3RoIDM1L0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nOMq5DI2NlAwMzBSyOUyNTEFs3K4DBTcFYK5ArkAXQQFxgplbmRzdHJlYW0KZW5kb2JqCgoyNyAwIG9iago8PC9MZW5ndGggNzAvRmlsdGVyL0ZsYXRlRGVjb2RlPj4Kc3RyZWFtCnic4yrkcgrhMlQwAEJDBWNLAwVTCyOFkFwu/YzUnDIFQwOFkDSFaBtTY3NTMyNzE7M0IDY0S7aLDfHicg3hCuQCAMv4Do0KZW5kc3RyZWFtCmVuZG9iagoKMjggMCBvYmoKPDwvTGVuZ3RoIDY3L0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nOMq5HIK4TJUMABCQwUTCwMFUwsjhZBcLv2M1JwyBUMDhZA0hWgbYyNjQ2MDo1RjA2MDu9gQLy7XEK5ALgCQpQ1oCmVuZHN0cmVhbQplbmRvYmoKCjI5IDAgb2JqCjw8L0xlbmd0aCA3MS9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeJzjKuRyCuEyVDAAQkMFY0sDBVMzI4WQXC79jNScMgVDA4WQNIVoG1MTM0NzCyMDIwtjCyNTI0u72BAvLtcQrkAuAMXJDiUKZW5kc3RyZWFtCmVuZG9iagoKMzAgMCBvYmoKPDwvTGVuZ3RoIDY1L0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nOMq5HIK4TJUMABCQwUTCwMFUzMjhZBcLv2M1JwyBUMDhZA0hWgbY0NjM6NUYwtjA7vYEC8u1xCuQC4Ad2sNDwplbmRzdHJlYW0KZW5kb2JqCgozMSAwIG9iago8PC9MZW5ndGggNzMvRmlsdGVyL0ZsYXRlRGVjb2RlPj4Kc3RyZWFtCnic4yrkcgrhMlQwAEJDBWNLAwVTEyOFkFwu/YzUpHwFQwOFkDSFaBtTE7M0cxMzQ7NkIwMzE3NTM1O72BAvLtcQrkAuAOfYDt0KZW5kc3RyZWFtCmVuZG9iagoKMzIgMCBvYmoKPDwvTGVuZ3RoIDY2L0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nOMq5HIK4TJUMABCQwUTCwMFUxMjhZBcLv2M1KR8BUMDhZA0hWgbYyMgNDNKNbYwNrCLDfHicg3hCuQCAI60DWIKZW5kc3RyZWFtCmVuZG9iagoKMzMgMCBvYmoKPDwvTGVuZ3RoIDEzMy9GaWx0ZXIvRmxhdGVEZWNvZGU+PgpzdHJlYW0KeNo1ijsKgjEQhPs9xd7AZJPM+oNYCDZ2QjqxMgkWWth4ficBWZZ5ffKRU5WogRe1BC2m9S27Z399da916O2QGyIyijUvHixgQ3dgUBPbAHo3auSTQ8OwbiEnMs3Zk9+4dbqG4slWh7w0I7vN1tN/m3nxw8nMRO5h/XivFzlXucoPE34p3QplbmRzdHJlYW0KZW5kb2JqCgozNCAwIG9iago8PC9UaXRsZShJbnZvaWNlIEhQLTIyMDcpL0F1dGhvciBudWxsL0NyZWF0b3IgbnVsbC9Qcm9kdWNlciBudWxsPj4KZW5kb2JqCgp4cmVmCjAgMzUKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDE2IDAwMDAwIG4gCjAwMDAwMDAwNjIgMDAwMDAgbiAKMDAwMDAwMDExNCAwMDAwMCBuIAowMDAwMDAwMTY2IDAwMDAwIG4gCjAwMDAwMDA0NTMgMDAwMDAgbiAKMDAwMDAwMDU0NyAwMDAwMCBuIAowMDAwMDAwNzAwIDAwMDAwIG4gCjAwMDAwMDA3ODkgMDAwMDAgbiAKMDAwMDAwMDk1NiAwMDAwMCBuIAowMDAwMDAxMDkyIDAwMDAwIG4gCjAwMDAwMDEyNTEgMDAwMDAgbiAKMDAwMDAwMTQwMSAwMDAwMCBuIAowMDAwMDAxNTg5IDAwMDAwIG4gCjAwMDAwMDE3MzQgMDAwMDAgbiAKMDAwMDAwMTg2NCAwMDAwMCBuIAowMDAwMDAyMDA4IDAwMDAwIG4gCjAwMDAwMDIxNDQgMDAwMDAgbiAKMDAwMDAwMjI0NyAwMDAwMCBuIAowMDAwMDAyNDA3IDAwMDAwIG4gCjAwMDAwMDI1MzIgMDAwMDAgbiAKMDAwMDAwMjY2NSAwMDAwMCBuIAowMDAwMDAyNzk4IDAwMDAwIG4gCjAwMDAwMDI5NTYgMDAwMDAgbiAKMDAwMDAwMzA4MiAwMDAwMCBuIAowMDAwMDAzMjE4IDAwMDAwIG4gCjAwMDAwMDMzNTQgMDAwMDAgbiAKMDAwMDAwMzQ1OCAwMDAwMCBuIAowMDAwMDAzNTk3IDAwMDAwIG4gCjAwMDAwMDM3MzMgMDAwMDAgbiAKMDAwMDAwMzg3MyAwMDAwMCBuIAowMDAwMDA0MDA3IDAwMDAwIG4gCjAwMDAwMDQxNDkgMDAwMDAgbiAKMDAwMDAwNDI4NCAwMDAwMCBuIAowMDAwMDA0NDg3IDAwMDAwIG4gCgp0cmFpbGVyCjw8L1NpemUgMzUvSW5mbyAzNCAwIFIvUm9vdCAxIDAgUi9JRFs8NDNDMzkyQzM5QUMzQjJDMjg3NTZDMzk4QzJBOUMyODM+PDgyNzVBMjg2NDAyNDkxRTdEQjlFQzFFOEU3QTkxNUEwPl0+PgpzdGFydHhyZWYKNDU3MQolJUVPRgo=\", \"INV-1041.pdf\": \"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MDAgbiAKMDAwMDAwMTQzNiAwMDAwMCBuIAowMDAwMDAxNjI0IDAwMDAwIG4gCjAwMDAwMDE3NjkgMDAwMDAgbiAKMDAwMDAwMTg5OSAwMDAwMCBuIAowMDAwMDAyMDQzIDAwMDAwIG4gCjAwMDAwMDIxNzkgMDAwMDAgbiAKMDAwMDAwMjI4MiAwMDAwMCBuIAowMDAwMDAyNDUyIDAwMDAwIG4gCjAwMDAwMDI1NzcgMDAwMDAgbiAKMDAwMDAwMjcxMCAwMDAwMCBuIAowMDAwMDAyODQzIDAwMDAwIG4gCjAwMDAwMDMwMDIgMDAwMDAgbiAKMDAwMDAwMzEyOCAwMDAwMCBuIAowMDAwMDAzMjYyIDAwMDAwIG4gCjAwMDAwMDMzOTggMDAwMDAgbiAKMDAwMDAwMzU0OCAwMDAwMCBuIAowMDAwMDAzNjc0IDAwMDAwIG4gCjAwMDAwMDM4MDggMDAwMDAgbiAKMDAwMDAwMzk0MiAwMDAwMCBuIAowMDAwMDA0MDQ2IDAwMDAwIG4gCjAwMDAwMDQxODMgMDAwMDAgbiAKMDAwMDAwNDMxOCAwMDAwMCBuIAowMDAwMDA0NDU5IDAwMDAwIG4gCjAwMDAwMDQ1OTIgMDAwMDAgbiAKMDAwMDAwNDczMyAwMDAwMCBuIAowMDAwMDA0ODY4IDAwMDAwIG4gCjAwMDAwMDUwNzEgMDAwMDAgbiAKCnRyYWlsZXIKPDwvU2l6ZSAzOS9JbmZvIDM4IDAgUi9Sb290IDEgMCBSL0lEWzwzNUMyQjJDMzlFQzI5RUMyOTA3Q0MzQjUxNEMzQjI1NT48MkJEMjdDODJGMUEzOTU0MzUyN0ZGRTcyNzJDM0U2MTQ+XT4+CnN0YXJ0eHJlZgo1MTU2CiUlRU9GCg==\", \"PC-3315.pdf\": \"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MDAwMDE2MjAgMDAwMDAgbiAKMDAwMDAwMTc2NSAwMDAwMCBuIAowMDAwMDAxODk1IDAwMDAwIG4gCjAwMDAwMDIwMzkgMDAwMDAgbiAKMDAwMDAwMjE3NSAwMDAwMCBuIAowMDAwMDAyMjc4IDAwMDAwIG4gCjAwMDAwMDI0NDAgMDAwMDAgbiAKMDAwMDAwMjU2NSAwMDAwMCBuIAowMDAwMDAyNjk4IDAwMDAwIG4gCjAwMDAwMDI4MzEgMDAwMDAgbiAKMDAwMDAwMjk4NyAwMDAwMCBuIAowMDAwMDAzMTEzIDAwMDAwIG4gCjAwMDAwMDMyNDUgMDAwMDAgbiAKMDAwMDAwMzM3OSAwMDAwMCBuIAowMDAwMDAzNTI5IDAwMDAwIG4gCjAwMDAwMDM2NTUgMDAwMDAgbiAKMDAwMDAwMzc4OSAwMDAwMCBuIAowMDAwMDAzOTIzIDAwMDAwIG4gCjAwMDAwMDQwMjcgMDAwMDAgbiAKMDAwMDAwNDE2NCAwMDAwMCBuIAowMDAwMDA0Mjk3IDAwMDAwIG4gCjAwMDAwMDQ0MzYgMDAwMDAgbiAKMDAwMDAwNDU2NyAwMDAwMCBuIAowMDAwMDA0NzA4IDAwMDAwIG4gCjAwMDAwMDQ4NDEgMDAwMDAgbiAKMDAwMDAwNTA0NCAwMDAwMCBuIAoKdHJhaWxlcgo8PC9TaXplIDM5L0luZm8gMzggMCBSL1Jvb3QgMSAwIFIvSURbPEMyOTFDMkEwMUZDM0I3QzJBQUMyQjczM0MyQkQ1MjVEPjxCNTU4M0IxREY0RERDRjBCN0RGNkZDMTNDRjUwREJEQz5dPj4Kc3RhcnR4cmVmCjUxMjgKJSVFT0YK\"};\nconst MAILS = [{\"json\": {\"from\": \"billing@northwind.example\", \"subject\": \"Invoices for November\"}, \"files\": {\"attachment_0\": \"INV-1041.pdf\", \"attachment_1\": \"HP-2207.pdf\"}}, {\"json\": {\"from\": \"invoices@peakcloud.example\", \"subject\": \"Your Peak Cloud invoice PC-3315\"}, \"files\": {\"attachment_0\": \"PC-3315.pdf\"}}];\nreturn MAILS.map(({ json, files }) => ({ json, binary: Object.fromEntries(Object.entries(files).map(([key, fileName]) =>\n  [key, { data: PDF[fileName], mimeType: 'application/pdf', fileName, fileExtension: 'pdf' }])) }));"
+      },
+      "id": "i02",
+      "name": "Sample invoice emails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "q": "has:attachment filename:pdf"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "i03",
+      "name": "New invoice email",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        200
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// A mail can carry several attachments. Keep the PDFs, one item each, with the mail it came from.\nconst out = [];\nfor (const { json, binary } of $input.all()) {\n  for (const file of Object.values(binary ?? {})) {\n    if (file.mimeType === 'application/pdf' || /\\.pdf$/i.test(file.fileName ?? '')) {\n      out.push({ json: { from: json.from?.text ?? json.from ?? '', subject: json.subject ?? '', fileName: file.fileName }, binary: { data: file } });\n    }\n  }\n}\nreturn out;"
+      },
+      "id": "i04",
+      "name": "One item per PDF",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "i05",
+      "name": "PDF to text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        660,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pull the invoice fields and lines out of the PDF text, then check the arithmetic in whole cents.\nconst src = $('One item per PDF').all();\nconst num = s => Number(String(s ?? '').replace(/,/g, ''));\nconst cents = v => Math.round(v * 100);\nconst fmt = v => v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });\nreturn $input.all().map(({ json }, i) => {\n  const text = json.text ?? '';\n  const lines = text.split('\\n').map(l => l.trim()).filter(Boolean);\n  const field = re => (text.match(re) ?? [])[1];\n  const items = lines\n    .map(l => l.match(/^(.+?) (\\d+) ([\\d,]+\\.\\d{2}) ([\\d,]+\\.\\d{2})$/))  // description, qty, unit price, amount\n    .filter(Boolean)\n    .map(([, description, qty, unit, amount]) => ({ description, qty: num(qty), unitPrice: num(unit), amount: num(amount) }));\n  const subtotal = num(field(/^Subtotal ([\\d,]+\\.\\d{2})$/m));\n  const tax = num(field(/^Tax[^\\n]* ([\\d,]+\\.\\d{2})$/m));\n  const total = num(field(/^Total due ([\\d,]+\\.\\d{2})$/m));\n  const problems = [];\n  if (!items.length) problems.push('no invoice lines found');\n  for (const l of items) if (cents(l.qty * l.unitPrice) !== cents(l.amount)) problems.push(`${l.description}: ${l.qty} x ${fmt(l.unitPrice)} is not ${fmt(l.amount)}`);\n  const lineSum = items.reduce((s, l) => s + cents(l.amount), 0);\n  if (lineSum !== cents(subtotal)) problems.push(`lines add up to ${fmt(lineSum / 100)} but the subtotal says ${fmt(subtotal)}`);\n  if (cents(subtotal) + cents(tax) !== cents(total)) problems.push(`subtotal + tax is ${fmt(subtotal + tax)} but the total says ${fmt(total)}`);\n  return { json: {\n    invoiceNo: field(/Invoice no: (\\S+)/) ?? '', date: field(/Date: (\\d{4}-\\d{2}-\\d{2})/) ?? '', vendor: lines[0] ?? '',\n    subtotal, tax, total, items, ok: problems.length === 0, problems: problems.join('; '),\n    fileName: src[i]?.json.fileName ?? '', from: src[i]?.json.from ?? '',\n  } };\n});"
+      },
+      "id": "i06",
+      "name": "Read invoice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c-ok",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "i07",
+      "name": "Sums check out?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// One row per invoice line. The invoice details repeat on every row so the sheet sorts and filters cleanly.\nreturn $input.all().flatMap(({ json: inv }) => inv.items.map((l, n) => ({ json: {\n  'Invoice no': inv.invoiceNo, Date: inv.date, Vendor: inv.vendor, Line: n + 1, Description: l.description,\n  Qty: l.qty, 'Unit price': l.unitPrice, Amount: l.amount, 'Invoice total': inv.total, 'Source file': inv.fileName,\n} })));"
+      },
+      "id": "i08",
+      "name": "One row per line",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "fileName": "invoices.xlsx",
+          "sheetName": "Invoice lines"
+        }
+      },
+      "id": "i09",
+      "name": "Excel file",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1540,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Invoice lines"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "i10",
+      "name": "Sheets: Invoice lines",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1540,
+        100
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// One flat row per invoice that failed a check, for a person to look at.\nreturn $input.all().map(({ json: inv }) => ({ json: {\n  'Invoice no': inv.invoiceNo, Date: inv.date, Vendor: inv.vendor, 'Total due': inv.total, Problem: inv.problems,\n  'Source file': inv.fileName, From: inv.from,\n} }));"
+      },
+      "id": "i11",
+      "name": "Problem rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Check by hand"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "i12",
+      "name": "Sheets: Check by hand",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1540,
+        250
+      ],
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "Run demo": {
+      "main": [
+        [
+          {
+            "node": "Sample invoice emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sample invoice emails": {
+      "main": [
+        [
+          {
+            "node": "One item per PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New invoice email": {
+      "main": [
+        [
+          {
+            "node": "One item per PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One item per PDF": {
+      "main": [
+        [
+          {
+            "node": "PDF to text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF to text": {
+      "main": [
+        [
+          {
+            "node": "Read invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read invoice": {
+      "main": [
+        [
+          {
+            "node": "Sums check out?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sums check out?": {
+      "main": [
+        [
+          {
+            "node": "One row per line",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Problem rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One row per line": {
+      "main": [
+        [
+          {
+            "node": "Excel file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sheets: Invoice lines",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Problem rows": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Check by hand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
