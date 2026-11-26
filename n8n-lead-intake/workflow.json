@@ -1,0 +1,119 @@
+{
+  "id": "leadIntakeDemo01",
+  "name": "Lead intake: check, de-duplicate, score, route",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "n01", "name": "Run demo", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Made-up leads (reserved .example domains) that hit every rule once.\nreturn [\n  { name: '  Jane  Cooper ', email: 'JANE.COOPER@EXAMPLE.COM', phone: '(555) 010-2234', source: 'website', message: 'Need a quote for monthly bookkeeping, budget around $800/month, can start next week' },\n  { name: 'Jane Cooper', email: 'jane.cooper@example.com', phone: '555-010-2234', source: 'facebook', message: 'Sent this twice by mistake' },\n  { name: 'Ravi Patel', email: 'ravi@acme-logistics.example', phone: '+1 555 010 7781', source: 'website', message: 'Looking for an automation to sync orders to our ERP. ASAP please.' },\n  { name: 'Lee', email: '', phone: '', source: 'website', message: 'Hi' },\n  { name: 'Maria Gomez', email: 'maria.gomez@example.net', phone: '', source: 'instagram', message: 'Can you build a Google Sheets dashboard for our cafe? Not urgent.' },\n  { name: 'Tom Becker', email: 'tom.becker@example.org', phone: '', source: 'facebook', message: 'Just browsing, what do you charge?' },\n  { name: 'Aisha Khan', email: 'aisha.khan@example', phone: '', source: 'google-ads', message: 'Please call me about payroll' },\n  { name: 'Chen Wei', email: 'chen.wei@brightwave.example', phone: '', source: 'google-ads', message: 'We have 3 stores and need weekly sales reports automated. Budget $2,000.' },\n].map(json => ({ json }));"
+      },
+      "id": "n02", "name": "Sample leads", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [220, 0]
+    },
+    {
+      "parameters": { "httpMethod": "POST", "path": "lead-intake", "responseMode": "onReceived", "options": {} },
+      "id": "n03", "name": "Website form", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [220, 200],
+      "webhookId": "6f1c2a7e-3b9d-4c55-9a0e-2d7f8b1c4e10"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clean every field, then say why a lead can't be used instead of dropping it silently.\nconst EMAIL = /^[^\\s@]+@[^\\s@]+\\.[a-z]{2,}$/i;\nreturn $input.all().map(({ json }) => {\n  const body = json.body ?? json; // the webhook wraps the form fields in body\n  const name = String(body.name ?? '').replace(/\\s+/g, ' ').trim();\n  const email = String(body.email ?? '').trim().toLowerCase();\n  const phone = String(body.phone ?? '').replace(/[^\\d+]/g, '');\n  const issues = [];\n  if (!name) issues.push('no name');\n  if (!email && !phone) issues.push('no email or phone');\n  if (email && !EMAIL.test(email)) issues.push('email looks wrong');\n  return { json: { name, email, phone, source: String(body.source ?? 'unknown'), message: String(body.message ?? '').trim(), valid: issues.length === 0, issues: issues.join('; ') } };\n});"
+      },
+      "id": "n04", "name": "Clean and check", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [440, 100]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "id": "c-valid", "leftValue": "={{ $json.valid }}", "rightValue": "", "operator": { "type": "boolean", "operation": "true", "singleValue": true } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n05", "name": "Usable?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [660, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Same person sent the form twice: keep the first one, matched by email (or phone when there is no email).\nconst seen = new Set();\nreturn $input.all().filter(({ json }) => {\n  const key = json.email || json.phone;\n  if (seen.has(key)) return false;\n  seen.add(key);\n  return true;\n});"
+      },
+      "id": "n06", "name": "Drop duplicates", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Plain rules a sales team can read and change. Score 60+ = hot, 30-59 = warm, else cold.\nconst money = m => { const x = m.match(/\\$\\s?([\\d,]+)/); return x ? Number(x[1].replace(/,/g, '')) : 0; };\nconst URGENT = /\\b(asap|urgent|today|this week|next week)\\b/i;\nconst CALM = /\\b(not urgent|no rush)\\b/i;\nreturn $input.all().map(({ json }) => {\n  const budget = money(json.message);\n  const why = [];\n  let score = 0;\n  if (budget) { score += 40; why.push('budget $' + budget.toLocaleString('en-US')); }\n  if (budget >= 1000) { score += 20; why.push('budget 1,000+'); }\n  if (URGENT.test(json.message) && !CALM.test(json.message)) { score += 25; why.push('wants it soon'); }\n  if (json.message.length >= 60) { score += 15; why.push('detailed request'); }\n  const tier = score >= 60 ? 'hot' : score >= 30 ? 'warm' : 'cold';\n  return { json: { ...json, score, tier, why: why.join(', ') || 'no signals' } };\n});"
+      },
+      "id": "n07", "name": "Score", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1100, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "id": "c-hot", "leftValue": "={{ $json.tier }}", "rightValue": "hot", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n08", "name": "Hot?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1320, -100]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": { "__rl": true, "mode": "name", "value": "#sales" },
+        "text": "=Hot lead ({{ $json.score }}): {{ $json.name }} <{{ $json.email }}> via {{ $json.source }}. Why: {{ $json.why }}",
+        "otherOptions": {}
+      },
+      "id": "n09", "name": "Slack: tell sales", "type": "n8n-nodes-base.slack", "typeVersion": 2.2, "position": [1540, -200], "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "url", "value": "" },
+        "sheetName": { "__rl": true, "mode": "name", "value": "Leads" },
+        "columns": { "mappingMode": "autoMapInputData", "value": {} },
+        "options": {}
+      },
+      "id": "n10", "name": "Sheets: Leads tab", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.5, "position": [1320, 100], "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// One line per run for the log, and the numbers the self-test checks.\nconst leads = $input.all().map(i => i.json);\nconst count = t => leads.filter(l => l.tier === t).length;\nreturn [{ json: { kept: leads.length, hot: count('hot'), warm: count('warm'), cold: count('cold'), leads: leads.map(l => `${l.tier.padEnd(4)} ${String(l.score).padStart(3)}  ${l.name} <${l.email || l.phone}>  ${l.why}`) } }];"
+      },
+      "id": "n11", "name": "Run summary", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "url", "value": "" },
+        "sheetName": { "__rl": true, "mode": "name", "value": "Check by hand" },
+        "columns": { "mappingMode": "autoMapInputData", "value": {} },
+        "options": {}
+      },
+      "id": "n12", "name": "Sheets: Check by hand", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.5, "position": [880, 300], "disabled": true
+    }
+  ],
+  "connections": {
+    "Run demo": { "main": [[{ "node": "Sample leads", "type": "main", "index": 0 }]] },
+    "Sample leads": { "main": [[{ "node": "Clean and check", "type": "main", "index": 0 }]] },
+    "Website form": { "main": [[{ "node": "Clean and check", "type": "main", "index": 0 }]] },
+    "Clean and check": { "main": [[{ "node": "Usable?", "type": "main", "index": 0 }]] },
+    "Usable?": { "main": [
+      [{ "node": "Drop duplicates", "type": "main", "index": 0 }],
+      [{ "node": "Sheets: Check by hand", "type": "main", "index": 0 }]
+    ] },
+    "Drop duplicates": { "main": [[{ "node": "Score", "type": "main", "index": 0 }]] },
+    "Score": { "main": [[
+      { "node": "Hot?", "type": "main", "index": 0 },
+      { "node": "Sheets: Leads tab", "type": "main", "index": 0 },
+      { "node": "Run summary", "type": "main", "index": 0 }
+    ]] },
+    "Hot?": { "main": [[{ "node": "Slack: tell sales", "type": "main", "index": 0 }], []] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" }
+}

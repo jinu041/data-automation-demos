@@ -19,6 +19,7 @@ Small, tested demos: spreadsheets that do the math, plus Python, JavaScript, C++
 | [ebook-epub-demo](ebook-epub-demo) | Reflowable EPUB 3 for Kindle from a public-domain short story (Poe, 1843): clickable table of contents, title and closing artwork that scale to the screen, a separate 1600 × 2560 cover JPEG, and 0 errors / 0 warnings in EPUBCheck 5.1.0 |
 | [claude-inquiry-triage](claude-inquiry-triage) | Python + Claude API: sorts customer messages into an Excel review queue (category, urgency, sentiment, summary, reply draft) using structured outputs, with a rule-based mode that runs without an API key |
 | [html-email-template](html-email-template) | Hand-coded HTML promo email: table layout and inline styles, columns that stack on phones, a button Outlook can draw, dark mode, and ready-to-paste copies for Mailchimp, Klaviyo and Brevo |
+| [n8n-lead-intake](n8n-lead-intake) | n8n workflow: website leads cleaned and checked, repeats dropped, scored with plain rules, hot leads sent to Slack and everything logged to Google Sheets, with a self-test that runs it through the n8n command line |
 | [claude-invoice-to-excel](claude-invoice-to-excel) | Python + Claude API: pulls vendor, date, line items and totals out of quote and invoice PDFs into Excel using structured outputs, then checks the math with exact decimals and Excel formulas (it catches a seller's typo in the sample) |
 
 More demos (spreadsheets and Python) are in [portfolio-demos](https://github.com/jinu041/portfolio-demos).
