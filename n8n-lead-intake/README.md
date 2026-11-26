@@ -43,7 +43,7 @@ This demo only compares leads within one run. For a live form, look up the email
 ## Files
 
 - `workflow.json`: the workflow (n8n 2.x, built and tested on 2.49.6)
-- `selftest.py`: imports and runs the workflow with the n8n command line, then checks the counts, the reject reasons and the "not urgent" trap
+- `selftest.py`: imports and runs the workflow with the n8n command line in a throwaway n8n folder, then checks the counts, the reject reasons and the "not urgent" trap
 - `make_diagram.py`, `diagram.png`: the picture above, drawn from `workflow.json`
 
 ## How it was made
