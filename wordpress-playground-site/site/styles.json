@@ -1,0 +1,30 @@
+{
+  "version": 3,
+  "isGlobalStylesUserThemeJSON": true,
+  "settings": {
+    "color": {
+      "palette": {
+        "custom": [
+          { "slug": "navy", "name": "Navy", "color": "#13293d" },
+          { "slug": "amber", "name": "Amber", "color": "#f5a524" },
+          { "slug": "mist", "name": "Mist", "color": "#eef2f5" },
+          { "slug": "line", "name": "Line", "color": "#d6dee6" },
+          { "slug": "steel", "name": "Steel", "color": "#4b5b6a" },
+          { "slug": "ice", "name": "Ice", "color": "#c9d6e2" }
+        ]
+      }
+    }
+  },
+  "styles": {
+    "elements": {
+      "heading": { "typography": { "fontWeight": "700" } },
+      "button": {
+        "border": { "radius": "6px" },
+        "color": { "background": "var:preset|color|amber", "text": "var:preset|color|navy" },
+        "typography": { "fontWeight": "700" },
+        ":hover": { "color": { "background": "#e3941a", "text": "var:preset|color|navy" } }
+      }
+    },
+    "css": ".wp-site-blocks>footer{margin-block-start:0}.wp-block-details summary{font-weight:700;cursor:pointer}.wpcf7 form>p{margin-block:0 1.1rem}.wpcf7 label{display:block;font-weight:600}.wpcf7-form-control-wrap{display:block;margin-top:.35rem}.wpcf7 input:where([type=text],[type=email],[type=tel],[type=date]),.wpcf7 textarea{box-sizing:border-box;width:100%;padding:.7rem .85rem;border:1px solid #7a8a99;border-radius:6px;background:var(--wp--preset--color--base);color:inherit;font:inherit}.wpcf7 textarea{height:8rem}.wpcf7 :where(input,textarea):focus{outline:2px solid var(--wp--preset--color--amber);outline-offset:1px}.wpcf7 .wpcf7-submit{padding:1rem 2.25rem;border:0;border-radius:6px;background:var(--wp--preset--color--amber);color:var(--wp--preset--color--navy);font:inherit;font-weight:700;cursor:pointer}.wpcf7 .wpcf7-submit:hover{background:#e3941a}"
+  }
+}

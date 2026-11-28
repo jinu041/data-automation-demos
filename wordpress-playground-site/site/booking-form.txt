@@ -1,0 +1,19 @@
+<label> Your name
+    [text* your-name autocomplete:name] </label>
+
+<label> Email
+    [email* your-email autocomplete:email] </label>
+
+<label> Phone
+    [tel* your-phone autocomplete:tel] </label>
+
+<label> Car make and model
+    [text* car-model placeholder "Year, make and model"] </label>
+
+<label> Preferred date (optional)
+    [date preferred-date] </label>
+
+<label> What does the car need? (optional)
+    [textarea your-message] </label>
+
+[submit "Request a booking"]

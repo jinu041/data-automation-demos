@@ -1,0 +1,65 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/",
+  "preferredVersions": { "php": "8.3", "wp": "latest" },
+  "steps": [
+    {
+      "step": "installPlugin",
+      "pluginData": { "resource": "wordpress.org/plugins", "slug": "contact-form-7" },
+      "options": { "activate": true },
+      "progress": { "caption": "Installing Contact Form 7" }
+    },
+    {
+      "step": "installTheme",
+      "themeData": { "resource": "wordpress.org/themes", "slug": "twentytwentyfive" },
+      "ifAlreadyInstalled": "overwrite",
+      "options": { "activate": true },
+      "progress": { "caption": "Installing Twenty Twenty-Five" }
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "Wrenfield Auto Care",
+        "blogdescription": "Honest repairs and servicing for everyday cars",
+        "permalink_structure": "/%postname%/",
+        "show_avatars": "0"
+      },
+      "progress": { "caption": "Setting the site title and tagline" }
+    },
+    { "step": "mkdir", "path": "/tmp/wrenfield" },
+    { "step": "writeFile", "path": "/tmp/wrenfield/home.html", "data": { "resource": "url", "url": "https://raw.githubusercontent.com/jinu041/data-automation-demos/main/wordpress-playground-site/site/home.html" } },
+    { "step": "writeFile", "path": "/tmp/wrenfield/services.html", "data": { "resource": "url", "url": "https://raw.githubusercontent.com/jinu041/data-automation-demos/main/wordpress-playground-site/site/services.html" } },
+    { "step": "writeFile", "path": "/tmp/wrenfield/pricing.html", "data": { "resource": "url", "url": "https://raw.githubusercontent.com/jinu041/data-automation-demos/main/wordpress-playground-site/site/pricing.html" } },
+    { "step": "writeFile", "path": "/tmp/wrenfield/faq.html", "data": { "resource": "url", "url": "https://raw.githubusercontent.com/jinu041/data-automation-demos/main/wordpress-playground-site/site/faq.html" } },
+    { "step": "writeFile", "path": "/tmp/wrenfield/contact.html", "data": { "resource": "url", "url": "https://raw.githubusercontent.com/jinu041/data-automation-demos/main/wordpress-playground-site/site/contact.html" } },
+    { "step": "writeFile", "path": "/tmp/wrenfield/footer.html", "data": { "resource": "url", "url": "https://raw.githubusercontent.com/jinu041/data-automation-demos/main/wordpress-playground-site/site/footer.html" } },
+    { "step": "writeFile", "path": "/tmp/wrenfield/styles.json", "data": { "resource": "url", "url": "https://raw.githubusercontent.com/jinu041/data-automation-demos/main/wordpress-playground-site/site/styles.json" } },
+    { "step": "writeFile", "path": "/tmp/wrenfield/booking-form.txt", "data": { "resource": "url", "url": "https://raw.githubusercontent.com/jinu041/data-automation-demos/main/wordpress-playground-site/site/booking-form.txt" } },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; wp_set_current_user( 1 ); foreach ( get_posts( array( 'post_type' => array( 'post', 'page' ), 'post_status' => 'any', 'numberposts' => -1 ) ) as $old ) { wp_delete_post( $old->ID, true ); }",
+      "progress": { "caption": "Removing the sample post and pages" }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; wp_set_current_user( 1 ); $home = untrailingslashit( home_url() ); foreach ( array( 'home' => 'Home', 'services' => 'Services', 'pricing' => 'Pricing', 'faq' => 'FAQ', 'contact' => 'Contact' ) as $slug => $title ) { $html = str_replace( '{{home_url}}', $home, file_get_contents( '/tmp/wrenfield/' . $slug . '.html' ) ); wp_insert_post( array( 'post_type' => 'page', 'post_status' => 'publish', 'post_name' => $slug, 'post_title' => $title, 'post_content' => wp_slash( $html ), 'meta_input' => array( '_wp_page_template' => 'page-no-title' ) ) ); }",
+      "progress": { "caption": "Creating Home, Services, Pricing, FAQ and Contact" }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; wp_set_current_user( 1 ); $ids = array(); foreach ( array( 'home', 'services', 'pricing', 'faq', 'contact' ) as $slug ) { $ids[] = get_page_by_path( $slug )->ID; } update_option( 'show_on_front', 'page' ); update_option( 'page_on_front', $ids[0] ); flush_rewrite_rules(); $links = ''; foreach ( $ids as $id ) { $links .= serialize_block( array( 'blockName' => 'core/navigation-link', 'attrs' => array( 'label' => get_the_title( $id ), 'type' => 'page', 'id' => $id, 'url' => get_permalink( $id ), 'kind' => 'post-type' ), 'innerBlocks' => array(), 'innerContent' => array() ) ); } wp_insert_post( array( 'post_type' => 'wp_navigation', 'post_status' => 'publish', 'post_title' => 'Main menu', 'post_content' => wp_slash( $links ) ) );",
+      "progress": { "caption": "Setting Home as the front page and building the menu" }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; wp_set_current_user( 1 ); $default = wpcf7_get_contact_form_by_title( 'Contact form 1' ); $mail = WPCF7_ContactFormTemplate::get_default( 'mail' ); $mail['subject'] = '[_site_title] booking request from [your-name]'; $mail['body'] = implode( PHP_EOL, array( 'Name: [your-name]', 'Email: [your-email]', 'Phone: [your-phone]', 'Car: [car-model]', 'Preferred date: [preferred-date]', '', '[your-message]' ) ); wpcf7_save_contact_form( array( 'id' => $default ? $default->id() : -1, 'title' => 'Service booking request', 'form' => file_get_contents( '/tmp/wrenfield/booking-form.txt' ), 'mail' => $mail ) );",
+      "progress": { "caption": "Adding the booking form" }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; wp_set_current_user( 1 ); wp_update_post( array( 'ID' => WP_Theme_JSON_Resolver::get_user_global_styles_post_id(), 'post_content' => wp_slash( file_get_contents( '/tmp/wrenfield/styles.json' ) ) ) ); $footer = wp_insert_post( array( 'post_type' => 'wp_template_part', 'post_status' => 'publish', 'post_name' => 'footer', 'post_title' => 'Footer', 'post_content' => wp_slash( file_get_contents( '/tmp/wrenfield/footer.html' ) ) ) ); wp_set_object_terms( $footer, get_stylesheet(), 'wp_theme' ); wp_set_object_terms( $footer, 'footer', 'wp_template_part_area' );",
+      "progress": { "caption": "Applying the brand colors and the footer" }
+    },
+    { "step": "login", "username": "admin" }
+  ]
+}
